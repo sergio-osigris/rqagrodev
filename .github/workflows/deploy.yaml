@@ -1,0 +1,157 @@
+name: CI/CD Workflow
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+      - name: Compress Project Files
+        run: |
+          ls -la  # List all files before compression
+          tar --warning=no-file-changed --exclude='.git' --exclude='node_modules' -czvf app.tar.gz . || echo "Error: $?"
+          ls -la app.tar.gz  # Verify the archive was created
+
+      - name: Clear previous build on server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_PRIVATE_KEY }}
+          timeout: 60s
+          command_timeout: 20m
+          script: |
+            sudo rm -rf ~/osigris_v2
+            mkdir ~/osigris_v2
+
+      - name: Copy Project Files to Server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_PRIVATE_KEY }}
+          source: "app.tar.gz"
+          target: ~/osigris_v2
+          timeout: 300s          # Increase timeout to 5 minutes
+          command_timeout: 20m   # Increase command timeout
+          debug: true           # Enable debugging
+          use_insecure_cipher: true
+      - name: Create .env on Remote and Deploy
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_PRIVATE_KEY }}
+          DEPLOY_HOST:      ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER:      ${{ secrets.DEPLOY_USER }}
+          ACCESS_TOKEN:     ${{ secrets.ACCESS_TOKEN }}
+          APP_ID:           ${{ secrets.APP_ID }}
+          APP_SECRET:       ${{ secrets.APP_SECRET }}
+          MODEL_VERSION:    ${{ secrets.MODEL_VERSION }}
+          OPENAI_API_KEY:   ${{ secrets.OPENAI_API_KEY }}
+          PG_DATABASE:      ${{ secrets.PG_DATABASE }}
+          PG_HOST:          ${{ secrets.PG_HOST }}
+          PG_PASSWORD:      ${{ secrets.PG_PASSWORD }}
+          PG_PORT:          ${{ secrets.PG_PORT }}
+          PG_USER:          ${{ secrets.PG_USER }}
+          PHONE_NUMBER_ID:  ${{ secrets.PHONE_NUMBER_ID }}
+          VERIFY_TOKEN:     ${{ secrets.VERIFY_TOKEN }}
+          VERSION:          ${{ secrets.VERSION }}
+        run: |
+          ###### 1) Prepare SSH key on the runner ######
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/deploy_key
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+
+          ###### 2) SSH into the remote host and deploy ######
+          ssh -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" bash <<EOF
+            set -e
+
+            cd ~/osigris_v2
+
+            # 2a) Extract the tarball as deploy user (no sudo), so ownership stays correct:
+            tar -xzf app.tar.gz
+
+            # 2b) Rebuild a fresh .env from the GitHub secrets
+          cat > .env <<EOL
+          ACCESS_TOKEN=$ACCESS_TOKEN
+          APP_ID=$APP_ID
+          APP_SECRET=$APP_SECRET
+          MODEL_VERSION=$MODEL_VERSION
+          OPENAI_API_KEY=$OPENAI_API_KEY
+          PG_DATABASE=$PG_DATABASE
+          PG_HOST=$PG_HOST
+          PG_PASSWORD=$PG_PASSWORD
+          PG_PORT=$PG_PORT
+          PG_USER=$PG_USER
+          PHONE_NUMBER_ID=$PHONE_NUMBER_ID
+          VERIFY_TOKEN=$VERIFY_TOKEN
+          VERSION=$VERSION
+          EOL
+
+            chmod 600 .env
+
+            # 2c) Install Docker if missing (using sudo)
+            if ! command -v docker &> /dev/null; then
+              echo "Installing Docker..."
+              sudo apt-get update
+              sudo apt-get install -y \
+                ca-certificates \
+                curl \
+                gnupg
+              sudo install -m 0755 -d /etc/apt/keyrings
+              curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+                | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+              sudo chmod a+r /etc/apt/keyrings/docker.gpg
+              echo "deb [arch=\$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+                https://download.docker.com/linux/ubuntu \
+                \$(. /etc/os-release && echo \$VERSION_CODENAME) stable" \
+                | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+              sudo apt-get update
+              sudo apt-get install -y \
+                docker-ce \
+                docker-ce-cli \
+                containerd.io \
+                docker-buildx-plugin \
+                docker-compose-plugin
+            fi
+
+            # 2d) Install docker-compose if missing (using sudo)
+            if ! command -v docker-compose &> /dev/null; then
+              echo "Installing Docker Compose..."
+              sudo curl -L \
+                "https://github.com/docker/compose/releases/download/v2.24.1/docker-compose-\$(uname -s)-\$(uname -m)" \
+                -o /usr/local/bin/docker-compose
+              sudo chmod +x /usr/local/bin/docker-compose
+            fi
+
+            # 2e) Stop & remove any existing prod containers (sudo)
+            docker-compose -f docker-compose.yml --env-file .env down
+
+            # 2f) Clean up dangling resources (sudo)
+            docker system prune -f
+            docker image prune -f
+            for vol in \$(docker volume ls -q -f "dangling=true"); do
+              if [ "\$vol" != "meal_prep_app-db-data" ]; then
+                docker volume rm "\$vol"
+              fi
+            done
+            docker network prune -f
+
+            # 2g) Rebuild & start with the newly created .env (sudo)
+            docker-compose -f docker-compose.yml --env-file .env up -d --build
+          EOF
+        shell: bash

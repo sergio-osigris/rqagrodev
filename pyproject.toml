@@ -1,0 +1,37 @@
+[tool.poetry]
+name = "osigris"
+version = "0.1.0"
+description = ""
+authors = [""]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = {extras = ["standard"], version = "^0.115.5"}
+uvicorn = "^0.32.0"
+sqlmodel = "^0.0.22"
+psycopg2-binary = "^2.9.10"
+python-dotenv = "^1.0.1"
+alembic = "^1.14.0"
+twilio = "^8.0.0"
+openai = "^1.0.0"
+pyairtable = "^3.0.1"
+pydantic = "^2.0.0"
+aiohttp = "^3.11.12"
+aiofiles = "^24.1.0"
+langchain-community = "*"
+langchain-core = "*"
+langgraph = "*"
+langchain-groq = "*"
+langchain-openai = "*"
+pytest = "^8.3.5"
+asyncpg = "^0.30.0"
+pytest-asyncio = "^0.26.0"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.10.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
