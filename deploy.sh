@@ -14,7 +14,7 @@ SOURCE_DIR="/home/developer/proyectos/osigris/"
 GITIGNORE_FILE="${SOURCE_DIR}.gitignore"
 
 DEST_USER="ubuntu"
-DEST_HOST="ec2-51-94-243-116.eu-south-2.compute.amazonaws.com"
+DEST_HOST="ec2-18-100-110-120.eu-south-2.compute.amazonaws.com"
 DEST_DIR="/home/ubuntu/v2/"
 
 # 2) Sanity checks

@@ -23,7 +23,7 @@ sudo apt install nginx certbot python3-certbot-nginx -y
 Si tu IP pública es `51.94.243.116`, entonces puedes usar:
 
 ```
-51-94-243-116.sslip.io
+18-100-110-120.sslip.io
 ```
 
 Este dominio gratuito apunta a tu IP y **es compatible con Let's Encrypt**.
@@ -43,7 +43,7 @@ Contenido:
 ```nginx
 server {
     listen 80;
-    server_name 51-94-243-116.sslip.io;
+    server_name 18-100-110-120.sslip.io;
 
     location / {
         proxy_pass http://localhost:8000;  # sin barra al final
@@ -65,7 +65,7 @@ sudo nginx -t && sudo systemctl reload nginx
 ### 4. 🔐 **Obtener y configurar el certificado HTTPS**
 
 ```bash
-sudo certbot --nginx -d 51-94-243-116.sslip.io
+sudo certbot --nginx -d 18-100-110-120.sslip.io
 ```
 
 Esto hará:
@@ -90,7 +90,7 @@ sudo systemctl reload nginx
 Abre en el navegador o usa `curl`:
 
 ```
-https://51-94-243-116.sslip.io
+https://18-100-110-120.sslip.io
 ```
 
 Tu servidor ya responde por HTTPS y **es válido para Facebook, Stripe, etc.**

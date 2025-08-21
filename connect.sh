@@ -1,1 +1,1 @@
-ssh -i "rqagro.pem" ubuntu@ec2-51-94-243-116.eu-south-2.compute.amazonaws.com
+ssh -i "rqagro.pem" ubuntu@ec2-18-100-110-120.eu-south-2.compute.amazonaws.com
