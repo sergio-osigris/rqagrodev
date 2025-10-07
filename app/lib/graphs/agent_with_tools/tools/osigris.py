@@ -28,7 +28,7 @@ def hacer_peticion_get(url):
         return "no"
 
 @tool("Comprobar_explotacion")    
-async def validar_explotacion(campaña: str, año: str) -> str:
+def validar_explotacion(campaña: str, año: str) -> str:
     """Usa esta función para comprobar si existe la campaña en osigris, pasándole el año y el alias de la campaña
     Arguments:
     - año: Año de la campaña introducido por el usuario
