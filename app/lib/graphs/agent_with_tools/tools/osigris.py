@@ -38,6 +38,6 @@ def validar_explotacion(campaña: str, año: str) -> str:
     - campaña: Alias/nombre de la campaña introducido por el usuario
     """
     logging.info(f"--Start ComprobarExplotacion tool with arguments: {año}, {campaña}")
-    # url = f"{API_URL}/osigrisapi/resource/season/list?&qg1[and]=year,alias&year[eq]={año}&alias[eq]={campaña}"
-    # return hacer_peticion_get(url)
-    return hacer_peticion_get_test(año, campaña)
+    url = f"{API_URL}/osigrisapi/resource/season/list?&qg1[and]=year,alias&year[eq]={año}&alias[eq]={campaña}"
+    return hacer_peticion_get(url)
+    # return hacer_peticion_get(año, campaña)
