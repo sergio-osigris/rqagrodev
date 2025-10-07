@@ -4,7 +4,7 @@ import logging
 import requests
 
 API_URL = "https://qnur3yjwqg.execute-api.eu-west-3.amazonaws.com"  
-ACCESS_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6ImZiZmVmYWVlMjcyZTQxNWNjMTBlNjgzNmFlNzhhZDllNTc4MWRlNGYiLCJqdGkiOiJmYmZlZmFlZTI3MmU0MTVjYzEwZTY4MzZhZTc4YWQ5ZTU3ODFkZTRmIiwiaXNzIjoiIiwiYXVkIjoib1NJR3JpcyIsInN1YiI6IjgiLCJ1c2VyaWQiOiI4IiwidXNlcm5hbWUiOiJhZG1pbnNlcmdpbyIsImVtYWlsIjoic2NhbWJlaXJvQG9zaWdyaXMuY29tIiwibm9tYnJlIjoiU2VyZ2lvIiwiYXBlbGxpZG8iOiJDYW1iZWlybyIsImV4cCI6MTc1OTg0MTA2OCwiaWF0IjoxNzU5ODM3NDY4LCJ0b2tlbl90eXBlIjoiYmVhcmVyIiwic2NvcGUiOiJpbnRlcm5hbF91c2VyIn0.RaLQQXnImsCLotzrm2UgKYzGx-ciOgpqGFxXq9QT8892TmewoAY1EojduUutLxR2skgJnlgRyMAyD8Hu-MPUgg9-nLVQqHrjtUEqUvR_rlN-RrUtmmIfuI0H2YGGdrWkWHzsR54xbCUOQFMqIvDko6O6hw2XvUQo2UqtN9Pf-rij6rHKm4L7GmzxKM8rdgIFgLCjYUIZP1qpr5zXSsoGuZ788oy4NbYjouZdtCnXcTqfTd-dfLc6E4Lw5tLmRvsrBmqu44vnvSE5Q2cr5Mv2QxoUasmrl6xj20Oio_7C94-_xxV7MFY872Fyp7aY5zfI9gH2Kmvgl5WE_lcZV0WF4g"
+ACCESS_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6ImQzZjg5MzU0YmExZDNhMDYwMTFjZWFiZTlkMWUzNTkxZDg2ZDMxYTYiLCJqdGkiOiJkM2Y4OTM1NGJhMWQzYTA2MDExY2VhYmU5ZDFlMzU5MWQ4NmQzMWE2IiwiaXNzIjoiIiwiYXVkIjoib1NJR3JpcyIsInN1YiI6IjgiLCJ1c2VyaWQiOiI4IiwidXNlcm5hbWUiOiJhZG1pbnNlcmdpbyIsImVtYWlsIjoic2NhbWJlaXJvQG9zaWdyaXMuY29tIiwibm9tYnJlIjoiU2VyZ2lvIiwiYXBlbGxpZG8iOiJDYW1iZWlybyIsImV4cCI6MTc1OTg1MDg1NiwiaWF0IjoxNzU5ODQ3MjU2LCJ0b2tlbl90eXBlIjoiYmVhcmVyIiwic2NvcGUiOiJpbnRlcm5hbF91c2VyIn0.UsCp55gDnQ1CUAr6jrAntyNL92-Ct2m_RiBnwrkJlyK4dUyPEh8SlH1fXb2wlCEGetlbiCjlufO9w8SWRHbfA7rypLrh-etGK_rTi0DG1LW6HY_npzoav2O7RmCbmJD0o9XgUvuvmEWEGww8-nQwAVRkSGiUkqiZm1-1OJiyxSx6K1l3O6bITrwdSLLuemJTEK_MgKuviCCVoSV7IITzpWPnv5gd2Yr3UzlBArrEwokX-L55oTAYVx4hdDZGCHSPDunkELlU_4qSjrjjfSRcBDm6tZashlZWBKhRSKMgM21N2zbNlZqTfJLhILv-HcQV3BKG1hsW83e2eg0dL268Ng"
 
 def hacer_peticion_get(url):
     headers = {
@@ -20,24 +20,20 @@ def hacer_peticion_get(url):
             if "data" in json_resp and json_resp["data"]:
                 return json_resp["data"]
             elif "error" in json_resp:
-                print("⚠️ Error devuelto por la API:", json_resp["error"])
+                logging.info("⚠️ Error devuelto por la API:", json_resp["error"])
                 return None
         return None
     except requests.RequestException as e:
-        print(f"Error al conectar con el endpoint: {e}")
+        logging.info(f"Error al conectar con el endpoint: {e}")
         return None
 
 @tool("Comprobar_explotacion")    
-async def validar_explotacion(año: str, campaña: str) -> str:
+async def validar_explotacion(campaña: str, año: str) -> str:
     """Usa esta función para comprobar si existe la campaña en osigris, pasándole el año y el alias de la campaña
     Arguments:
     - año: Año de la campaña introducido por el usuario
     - campaña: Alias/nombre de la campaña introducido por el usuario
     """
     logging.info(f"--Start comprobar_explotacion tool with arguments: {año}, {campaña}")
-    db_client = PostgresClient()
-    await db_client.initialize()
-    fitosanitarios = await db_client.read_fitosanitarios()
-    return fitosanitarios
     url = f"{API_URL}/osigrisapi/resource/season/list?&qg1[and]=year,alias&year[eq]={año}&alias[eq]={campaña}"
     return hacer_peticion_get(url)
