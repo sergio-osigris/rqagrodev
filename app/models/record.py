@@ -61,6 +61,8 @@ class RecordRequest(BaseModel):
     user_id: str = Field(..., title="ID de Usuario", description="Identificador único y persistente del usuario que realiza o está asociado a este registro. Ejemplo: 'user_abc_123'.")
     Tipo_de_incidencia: Literal["None", "Labor", "Fitosanitario", "Fertilizante"] = Field(..., alias="Tipo de incidencia", description="Categoría principal del registro. Indica si la entrada corresponde a una 'Labor' agrícola general, una aplicación de 'Fitosanitario', o el uso de un 'Fertilizante'. Seleccionar 'None' si no aplica.")
     Tratamiento_fertilizante_labor: str = Field("", alias="Nombre del fitosanitario", description="Nombre específico del tratamiento, producto fertilizante, o tipo de labor realizada. Ejemplos: 'Azoxystrobin 25%', 'Abonado de fondo NPK 15-15-15', 'Poda de formación', 'Siembra directa'.")
+    Campaña: str = Field("", alias="Nombre de la campaña", description="Nombre/alias específico de la campaña. Ejemplos: 'Prueba', 'Explotacion'.")
+    Año_campaña: str = Field("", alias="Año de la campaña", description="Año en el que se realiza la campaña. Ejemplos: '2023', '2024', '2022', '2025'.")
     Problema_en_campo: Optional[str] = Field("", alias="Problema en campo", description="Descripción textual del problema observado en el campo que motivó la acción. Ejemplos: 'Pulgón en tomate', 'Mildiu en vid', 'Necesidad de aporte de nitrógeno', 'Terreno compactado'.")
     Dosis: Optional[str] = Field("", title="Dosis Aplicada", description="Cantidad del producto (fitosanitario o fertilizante) aplicado, incluyendo unidades. Fundamental para el seguimiento y la seguridad. Ejemplo: '50 kg'.")
     Cultivo: Optional[str] = Field("", title="Cultivo Tratado", description="Nombre del cultivo específico que recibió la aplicación o sobre el cual se realizó la labor. Ejemplos: 'Tomate pera', 'Viñedo Tempranillo', 'Trigo duro', 'Oliveral Picual'.")
@@ -78,6 +80,8 @@ class RecordRequest(BaseModel):
                 "user_id": "user_ana_perez_456",
                 "Tipo de incidencia": "Fitosanitario",
                 "Tratamiento/ fertilizante / labor": "Metenal",
+                "Campaña": "ExploPrueba",
+                "Año_campaña": "2025",
                 "Problema en campo": "Ataque severo de mildiu en hojas",
                 "Dosis": "10kg ",
                 "Cultivo": "Viñedo - variedad Albariño",

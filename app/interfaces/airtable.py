@@ -41,7 +41,7 @@ class PostgresClient:
 
     async def read_records(self) -> List[Record]:
         async with self._pool.acquire() as conn:
-            rows = await conn.fetch("SELECT * FROM rqagro")
+            rows = await conn.fetch("SELECT * FROM rqagro_dev")
             # print(rows)
             # return [Record(**dict(row)).dict() for row in rows]
             return [dict(row) for row in rows]
@@ -55,16 +55,18 @@ class PostgresClient:
             return [dict(row) for row in rows]
 
     async def create_record(
-        self, user_id: str, incident_type: str, treatment: str, problem: str,
+        self, user_id: str, incident_type: str, treatment: str, campaign: str, year_campaign: str, problem: str,
         amount: str, location: str, size: int, date: str, caldo: str, aplicador: str,name: str = "",parcelas:str =""
     ) -> Dict[str, Any]:
         async with self._pool.acquire() as conn:
             row = await conn.fetchrow(
                 """
-                INSERT INTO rqagro (
+                INSERT INTO rqagro_dev (
                     user_id,
                     "Tipo de incidencia",
                     "Tratamiento/ fertilizante / labor",
+                    "Campaña",
+                    "Año campaña",
                     "Problema en campo",
                     "Dosis",
                     "Cultivo",
@@ -75,10 +77,10 @@ class PostgresClient:
                     "Nombre",
                     "parcelas"
                 )
-                VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+                VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
                 RETURNING *
                 """,
-                user_id, incident_type, treatment, problem,
+                user_id, incident_type, treatment, campaign, year_campaign, problem,
                 amount, location, size, date, caldo, aplicador,name,parcelas
             )
 

@@ -32,6 +32,8 @@ async def save_record(record: RecordRequest):
             user_id=record.user_id,
             incident_type=record.Tipo_de_incidencia,
             treatment=record.Tratamiento_fertilizante_labor,
+            campaign=record.Campaña,
+            year_campaign=record.Año_campaña,
             problem=record.Problema_en_campo or "",
             amount=record.Dosis or "",
             location=record.Cultivo or "",
