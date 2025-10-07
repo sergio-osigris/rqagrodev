@@ -71,7 +71,7 @@ Antes de guardar el registro, el asistente deberá asegurarse de pedir estos dat
        > “¿En qué cultivo?”  
        > “¿Cómo se llama la campaña?”  
        > “¿De que año es la campaña?”  
-     - (No preguntes proactivamente por otros campos como Aplicador, Superficie, etc., a menos que el usuario inicie una modificación sobre ellos en el paso 4).
+     - (No preguntes proactivamente por otros campos como Aplicador, Superficie, etc., a menos que el usuario inicie una modificación sobre ellos en el paso 5).
  
 4. **Recepción de año y nombre de la campaña**  
    - El usuario escribe algo como:  
