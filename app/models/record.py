@@ -13,6 +13,8 @@ class Record(BaseModel):
     Fecha: date = Field(..., title="Fecha de la Incidencia/Aplicación", description="Fecha principal en la que ocurrió la labor, aplicación o se observó la incidencia. Formato: AAAA-MM-DD. Ejemplo: '2024-07-14'.")
     Tipo_de_incidencia: Literal["None","Labor", "Fitosanitario", "Fertilizante"] = Field(..., alias="Tipo de incidencia", description="Categoría principal de la incidencia registrada. Indica si es una 'Labor' (ej. siembra, poda), una aplicación de 'Fitosanitario', un 'Fertilizante', o 'None' si no aplica. Ejemplo: 'Fitosanitario'.")
     Tratamiento_fertilizante_labor: str = Field(..., alias="Tratamiento/ fertilizante / labor", description="Nombre específico del tratamiento, producto fertilizante, o tipo de labor realizada. Ejemplos: 'Azoxystrobin 25%', 'Abonado de fondo NPK 15-15-15', 'Poda de formación', 'Siembra directa'.")
+    Campaña: str = Field("", alias="Nombre de la campaña", description="Nombre/alias específico de la campaña. Ejemplos: 'Prueba', 'Explotacion'.")
+    Año_campaña: str = Field("", alias="Año de la campaña", description="Año en el que se realiza la campaña. Ejemplos: '2023', '2024', '2022', '2025'.")
     Problema_en_campo: Optional[str] = Field(..., alias="Problema en campo", description="Descripción detallada del problema o plaga detectada en el campo que motivó la acción. Ejemplos: 'Fuerte ataque de mildiu en hojas basales', 'Clorosis férrica en brotes jóvenes', 'Compactación del suelo post-lluvias'.")
     Dosis: Optional[str] = Field(..., title="Dosis Aplicada", description="Cantidad del producto (fitosanitario o fertilizante) aplicado, especificando las unidades. Ejemplos: '1.5 L/ha', '300 kg/ha', '2 cc/L de agua'.")
     Caldo: Optional[str] = Field(..., title="Tipo de Caldo o Mezcla", description="Descripción del tipo de mezcla o solución utilizada, si aplica, especialmente para fitosanitarios. No la cantidad, sino la naturaleza. Ejemplos: 'Suspensión concentrada (SC)', 'Mojante + Fungicida', 'Solución madre'. Si es una cantidad, usar el campo Dosis o especificar aquí si es volumen total de mezcla. Para aplicaciones en seco, puede ser 'No aplica' o nulo.")
@@ -35,6 +37,8 @@ class Record(BaseModel):
                 "Fecha": "2024-07-14",
                 "Tipo de incidencia": "Fitosanitario",
                 "Tratamiento/ fertilizante / labor": "Fungicida XPLUS",
+                "Campaña": "ExploPrueba",
+                "Año_campaña": "2025",
                 "Problema en campo": "Presencia de oidio en hojas de pepino",
                 "Dosis": "0.5 L/ha",
                 "Caldo": "Mezcla con adherente YZ",
