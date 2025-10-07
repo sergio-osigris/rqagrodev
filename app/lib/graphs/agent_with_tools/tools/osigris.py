@@ -30,14 +30,14 @@ def hacer_peticion_get(url) -> str:
 def hacer_peticion_get_test(año, campaña) -> str:
     return "si" if año == "2025" and campaña == "prueba" else "no"
 
-@tool("Comprobar_explotacion")    
+@tool("ComprobarExplotacion")    
 def validar_explotacion(campaña: str, año: str) -> str:
     """Usa esta función para comprobar si existe la campaña en osigris, pasándole el año y el alias de la campaña
     Arguments:
     - año: Año de la campaña introducido por el usuario
     - campaña: Alias/nombre de la campaña introducido por el usuario
     """
-    logging.info(f"--Start comprobar_explotacion tool with arguments: {año}, {campaña}")
-    url = f"{API_URL}/osigrisapi/resource/season/list?&qg1[and]=year,alias&year[eq]={año}&alias[eq]={campaña}"
+    logging.info(f"--Start ComprobarExplotacion tool with arguments: {año}, {campaña}")
+    # url = f"{API_URL}/osigrisapi/resource/season/list?&qg1[and]=year,alias&year[eq]={año}&alias[eq]={campaña}"
     # return hacer_peticion_get(url)
     return hacer_peticion_get_test(año, campaña)
