@@ -1,39 +1,15 @@
-from pydantic import BaseModel, PrivateAttr
-from typing import List, Dict, Any, Optional
-
+from pydantic import BaseModel,Field
+from typing import Annotated, Literal
+from langchain_core.messages import BaseMessage
+import operator
+from typing import List,Dict
 class ChatState(BaseModel):
-    """
-    Estado de la conversación del usuario.
-    Compatible con FastAPI como modelo Pydantic.
-    """
-    messages: List[Dict[str, Any]]
-    user_id: str
-    name: str
-
-    # Datos extraídos (opcionalmente nulos)
-    fitosanitario: Optional[str] = None
-    campaña: Optional[str] = None
-    año: Optional[int] = None
-    dosis: Optional[str] = None
-    cultivo: Optional[str] = None
-    aplicador: Optional[str] = None
-    fecha: Optional[str] = None
-
-    # Atributos privados (no se incluyen en JSON)
-    _fitosanitario_validado: bool = PrivateAttr(default=False)
-    _campaña_validada: bool = PrivateAttr(default=False)
-
-    # Métodos auxiliares
-    def validar_fitosanitario(self):
-        self._fitosanitario_validado = True
-
-    def validar_campaña(self):
-        self._campaña_validada = True
-
-    @property
-    def fitosanitario_validado(self):
-        return self._fitosanitario_validado
-
-    @property
-    def campaña_validada(self):
-        return self._campaña_validada
+    # We store a pure Python list of dicts:
+    #   {"role": <str>, "content": <str>}
+    messages: List[Dict[str, str]]
+    user_id: str = Field(description="User id from names table")
+    name: str = Field(description="Full name of user")
+    record_added: bool = Field(description="Indicates if the current conversation has already been saved to a new record.",default=False)
+    
+    class Config:
+        arbitrary_types_allowed = True
