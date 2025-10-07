@@ -1,4 +1,5 @@
 from langchain_core.tools import tool
+from app.interfaces.airtable import PostgresClient
 import logging
 import requests
 
@@ -27,12 +28,16 @@ def hacer_peticion_get(url):
         return None
 
 @tool("Comprobar_explotacion")    
-def validar_explotacion(año: str, campaña: str) -> str:
+async def validar_explotacion(año: str, campaña: str) -> str:
     """Usa esta función para comprobar si existe la campaña en osigris, pasándole el año y el alias de la campaña
     Arguments:
     - año: Año de la campaña introducido por el usuario
     - campaña: Alias/nombre de la campaña introducido por el usuario
     """
     logging.info(f"--Start comprobar_explotacion tool with arguments: {año}, {campaña}")
+    db_client = PostgresClient()
+    await db_client.initialize()
+    fitosanitarios = await db_client.read_fitosanitarios()
+    return fitosanitarios
     url = f"{API_URL}/osigrisapi/resource/season/list?&qg1[and]=year,alias&year[eq]={año}&alias[eq]={campaña}"
     return hacer_peticion_get(url)
