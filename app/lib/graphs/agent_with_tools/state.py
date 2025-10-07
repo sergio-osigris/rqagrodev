@@ -1,28 +1,39 @@
-from typing import List, Dict, Any
+from pydantic import BaseModel, PrivateAttr
+from typing import List, Dict, Any, Optional
 
-class ChatState:
+class ChatState(BaseModel):
     """
     Estado de la conversación del usuario.
-    Mantiene los mensajes y el estado de validación de herramientas.
+    Compatible con FastAPI como modelo Pydantic.
     """
+    messages: List[Dict[str, Any]]
+    user_id: str
+    name: str
 
-    def __init__(self, messages: List[Dict[str, Any]], user_id: str, name: str):
-        self.messages = messages  # Lista de mensajes del chat
-        self.user_id = user_id    # ID del usuario
-        self.name = name          # Nombre del usuario
+    # Datos extraídos (opcionalmente nulos)
+    fitosanitario: Optional[str] = None
+    campaña: Optional[str] = None
+    año: Optional[int] = None
+    dosis: Optional[str] = None
+    cultivo: Optional[str] = None
+    aplicador: Optional[str] = None
+    fecha: Optional[str] = None
 
-        # Estado de validación de herramientas
-        self.fitosanitario_validado = False  # True si CheckFitosanitario ya se ejecutó
-        self.campaña_validada = False        # True si ComprobarExplotacion ya se ejecutó
+    # Atributos privados (no se incluyen en JSON)
+    _fitosanitario_validado: bool = PrivateAttr(default=False)
+    _campaña_validada: bool = PrivateAttr(default=False)
 
-        # Datos extraídos
-        self.fitosanitario = None
-        self.campaña = None
-        self.año = None
+    # Métodos auxiliares
+    def validar_fitosanitario(self):
+        self._fitosanitario_validado = True
 
-        # Puedes agregar otros campos si los necesitas en tu flujo
-        # ej: dosis, cultivo, aplicador, fecha, etc.
-        self.dosis = None
-        self.cultivo = None
-        self.aplicador = None
-        self.fecha = None
+    def validar_campaña(self):
+        self._campaña_validada = True
+
+    @property
+    def fitosanitario_validado(self):
+        return self._fitosanitario_validado
+
+    @property
+    def campaña_validada(self):
+        return self._campaña_validada
