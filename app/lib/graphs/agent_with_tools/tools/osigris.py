@@ -18,33 +18,29 @@ def hacer_peticion_get(url) -> str:
             
             # Validar que tenga 'data' y que no haya 'error'
             if "data" in json_resp and json_resp["data"]:
-                return "si", json_resp["data"][0]["info"]["id"]
+                return "si", json_resp["data"]
             elif "error" in json_resp:
                 logging.info("⚠️ Error devuelto por la API:", json_resp["error"])
                 return "no", None
         return "no", None
     except requests.RequestException as e:
         logging.info(f"Error al conectar con el endpoint: {e}")
-        return "no"
+        return "no", None
 
 @tool("ComprobarExplotacion")    
-def validar_explotacion(campaña: str, año: str) -> str:
-    """Usa esta función para comprobar si existe la campaña en osigris, pasándole el año y el alias de la campaña
+def validar_explotacion(campaña: str, año: str, cultivo: str) -> tuple[bool, str]:
+    """Usa esta función para comprobar si existe la campaña en osigris, pasándole el año y el alias de la campaña. 
+    Si existe, se comprueba que el cultivo pertenezca a dicha campaña
     Arguments:
     - año: Año de la campaña introducido por el usuario
     - campaña: Alias/nombre de la campaña introducido por el usuario
+    - cultivo: Nombre del cultivo introducido por el usuario
     """
     logging.info(f"--Start ComprobarExplotacion tool with arguments: {año}, {campaña}")
     url = f"{API_URL}/osigrisapi/resource/season/list?&qg1[and]=year,alias&year[eq]={año}&alias[eq]={campaña}"
-    return hacer_peticion_get(url)
-
-# @tool("ComprobarCultivo")    
-# def validar_explotacion(cultivo: str) -> str:
-#     """Usa esta función para comprobar si existe el cultivo en la campaña en osigris, pasándole el año y el alias de la campaña
-#     Arguments:
-#     - año: Año de la campaña introducido por el usuario
-#     - campaña: Alias/nombre de la campaña introducido por el usuario
-#     """
-#     logging.info(f"--Start ComprobarCultivo tool with arguments: {cultivo}, {ID_CAMPAÑA}")
-#     url = f"{API_URL}/osigrisapi/season/show/{ID_CAMPAÑA}/crop/list?qg1[and]=typecrop&typecrop[in]={cultivo}"
-#     return hacer_peticion_get(url)
+    valido, datos = hacer_peticion_get(url)
+    if valido:
+        id_campaña = datos[0]["info"]["id"]
+        return valido, f"Existe ese año de campaña con el nombre indicado correctamente. {id_campaña}"
+    else:
+        return valido, "No existe ese año de campaña con el nombre indicado."
