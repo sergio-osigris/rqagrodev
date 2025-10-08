@@ -18,14 +18,14 @@ def hacer_peticion_get(url) -> str:
             
             # Validar que tenga 'data' y que no haya 'error'
             if "data" in json_resp and json_resp["data"]:
-                return "si", json_resp["data"]
+                return True, json_resp["data"]
             elif "error" in json_resp:
                 logging.info("⚠️ Error devuelto por la API:", json_resp["error"])
-                return "no", None
-        return "no", None
+                return False, None
+        return False, None
     except requests.RequestException as e:
         logging.info(f"Error al conectar con el endpoint: {e}")
-        return "no", None
+        return False, None
 
 @tool("ComprobarExplotacion")    
 def validar_explotacion(campaña: str, año: str, cultivo: str) -> tuple[bool, str]:
