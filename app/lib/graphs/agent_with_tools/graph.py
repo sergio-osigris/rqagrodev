@@ -51,7 +51,7 @@ if __name__ == "__main__":
         from langchain_openai import ChatOpenAI
         from langchain.tools import Tool
         from app.lib.graphs.agent_with_tools.tools.fitosanitarios import check_fitosanitarios,available_fitosanitarios
-        from app.lib.graphs.agent_with_tools.tools.osigris import validar_explotacion
+        from app.lib.graphs.agent_with_tools.tools.osigris import validar_explotacion, validar_cultivo
         from app.lib.graphs.agent_with_tools.tools.record import save_record,create_record
         from app.lib.graphs.agent_with_tools.tools.utils import get_current_date
         from dotenv import load_dotenv, find_dotenv
@@ -62,7 +62,7 @@ if __name__ == "__main__":
         _: bool = load_dotenv(find_dotenv())    
 
         llm = ChatOpenAI(model_name="gpt-4o-2024-11-20")
-        tools = [validar_explotacion, check_fitosanitarios,save_record,create_record,get_current_date,available_fitosanitarios]
+        tools = [validar_cultivo, validar_explotacion, check_fitosanitarios,save_record,create_record,get_current_date,available_fitosanitarios]
         
         chat_graph = ChatGraph(llm=llm, tools=tools)
         workflow = chat_graph.graph()
