@@ -18,17 +18,14 @@ def hacer_peticion_get(url) -> str:
             
             # Validar que tenga 'data' y que no haya 'error'
             if "data" in json_resp and json_resp["data"]:
-                return "si"
+                return "si", json_resp["data"][0]["info"]["id"]
             elif "error" in json_resp:
                 logging.info("⚠️ Error devuelto por la API:", json_resp["error"])
-                return "no"
-        return "no"
+                return "no", None
+        return "no", None
     except requests.RequestException as e:
         logging.info(f"Error al conectar con el endpoint: {e}")
         return "no"
- 
-def hacer_peticion_get_test(año, campaña) -> str:
-    return "si" if año == "2025" and campaña == "prueba" else "no"
 
 @tool("ComprobarExplotacion")    
 def validar_explotacion(campaña: str, año: str) -> str:
@@ -40,4 +37,14 @@ def validar_explotacion(campaña: str, año: str) -> str:
     logging.info(f"--Start ComprobarExplotacion tool with arguments: {año}, {campaña}")
     url = f"{API_URL}/osigrisapi/resource/season/list?&qg1[and]=year,alias&year[eq]={año}&alias[eq]={campaña}"
     return hacer_peticion_get(url)
-    # return hacer_peticion_get(año, campaña)
+
+# @tool("ComprobarCultivo")    
+# def validar_explotacion(cultivo: str) -> str:
+#     """Usa esta función para comprobar si existe el cultivo en la campaña en osigris, pasándole el año y el alias de la campaña
+#     Arguments:
+#     - año: Año de la campaña introducido por el usuario
+#     - campaña: Alias/nombre de la campaña introducido por el usuario
+#     """
+#     logging.info(f"--Start ComprobarCultivo tool with arguments: {cultivo}, {ID_CAMPAÑA}")
+#     url = f"{API_URL}/osigrisapi/season/show/{ID_CAMPAÑA}/crop/list?qg1[and]=typecrop&typecrop[in]={cultivo}"
+#     return hacer_peticion_get(url)
