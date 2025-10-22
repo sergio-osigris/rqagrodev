@@ -41,8 +41,12 @@ def validar_explotacion(campaña: str, año: str) -> str:
     valido, datos = hacer_peticion_get(url)
     if valido=="si":
         global ID_CAMPAÑA
-        ID_CAMPAÑA=datos[0]["info"]["id"]
-        return f"Campaña comprobada. ID de Campaña: {ID_CAMPAÑA}"
+        if len(datos) == 1:
+            ID_CAMPAÑA=datos[0]["info"]["id"]
+            return f"Campaña comprobada. ID de Campaña: {ID_CAMPAÑA}"
+        else:
+            ID_CAMPAÑA = [obj["info"]["id"] for obj in datos]
+            return f"Existen varias campañas con el {año} y {campaña} indicados. IDs de las campañas: {ID_CAMPAÑA}"   
     else:
         return f"No encuentro ninguna campaña del {año} con el nombre {campaña}"
 
