@@ -42,7 +42,7 @@ def validar_explotacion(campaña: str, año: str) -> str:
     if valido=="si":
         global ID_CAMPAÑA
         ID_CAMPAÑA=datos[0]["info"]["id"]
-    return valido
+    return valido, ID_CAMPAÑA
 
 @tool("ComprobarCultivo")    
 def validar_cultivo(cultivo: str) -> str:
