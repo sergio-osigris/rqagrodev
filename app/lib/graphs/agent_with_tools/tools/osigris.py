@@ -55,7 +55,7 @@ def validar_cultivo(cultivo: str, id_campaña: str, variedad: str) -> str:
     - cultivo: Cultivo introducido por el usuario
     - id_campaña: Alias/nombre de la campaña obtenido en validar_explotacion
     """
-    logging.info(f"--Start ComprobarCultivo tool with arguments: {cultivo}, {id_campaña}")
+    logging.info(f"--Start ComprobarCultivo tool with arguments: {cultivo}, {id_campaña}, {variedad}")
     url = f"{API_URL}/osigrisapi/season/show/{id_campaña}/crop/list?qg1[and]=typecrop,typevariety&typecrop[in]={cultivo}&typevariety[in]={variedad}"
     valido, datos = hacer_peticion_get(url)
     if valido=="si":
@@ -68,7 +68,6 @@ def validar_cultivo(cultivo: str, id_campaña: str, variedad: str) -> str:
                 nombre = d["subtype"]["typecrop"]["name"]
                 variedad = d["subtype"]["name"]
                 nombres.append(f"{nombre}-{variedad}")
-                return f"Existen varios cultivos en la campaña indicada. Elige uno de estos cultivos-variedad: {nombres}"   
+            return f"Existen varios cultivos en la campaña indicada. Elige uno de estos cultivos-variedad: {nombres}"   
     else:
         return f"No encuentro ningún cultivo en la campaña indicada"
-    return valido
