@@ -128,7 +128,6 @@ Antes de guardar el registro, el asistente deberá asegurarse de pedir estos dat
      > • Año campaña: 2025  
      > • Aplicador: campo de El Prado  
      > • Fecha: 02/06/2025”  
-     > • ID Campaña: 102310 (valor obtenido en ComprobarExplotacion)
      • Si se produce un error, informa:  
        > “Error al guardar: [mensaje de error]. Por favor, inténtalo de nuevo o avísame si necesitas ayuda.”
 
