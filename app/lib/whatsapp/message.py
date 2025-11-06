@@ -148,8 +148,10 @@ class WhatsAppMessageHandler:
                 payload = self.build_list_payload(recipient, text, button_titles)
             else:
                 payload = self.build_list_payload(recipient, text, button_titles)
+            print(json.dumps(payload, indent=2))
             data = json.dumps(payload)
         else:
+            print("ERROR")
             data = self.get_text_message_input(recipient, text)
 
         async with aiohttp.ClientSession() as session:
