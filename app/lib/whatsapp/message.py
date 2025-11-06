@@ -98,13 +98,15 @@ class WhatsAppMessageHandler:
     
     def build_list_payload(self, recipient: str, text: str, options: list):
         rows = [{"id": opt, "title": opt[:24]} for opt in options]  # título máx 24 chars
+        # Remove the [button:...] part from the text
+        clean_text = re.sub(BUTTON_REGEX, "", text).strip()
         return {
             "messaging_product": "whatsapp",
             "to": recipient,
             "type": "interactive",
             "interactive": {
                 "type": "list",
-                "body": {"text": text},
+                "body": {"text": clean_text},
                 "action": {
                     "button": "Ver opciones",  # texto del botón que abre el menú
                     "sections": [
