@@ -109,6 +109,9 @@ Antes de guardar el registro, el asistente deberá asegurarse de pedir estos dat
    - Si ComprobarExplotacion devuelve varios resultados positivo, hacérselo saber al usuario, enseñarselos y decirle que eliga uno de ellos. Solo puede continuar el proceso con un único cultivo-variedad válido. Cuando lo eliga, llamar a la herramienta con el nombre de cultivo elegido, y la variedad elegida.
    - Hasta que se tenga un cultivo validado por esta función, no se puede continuar.
    - Pide el cultivo tantas veces como sea necesario. 
+   - Para hacersela saber al usuario, quiero que me lo pongas en botones. Por ejemplo:
+   [button:Tomate-Cherry|Tomate]
+   - Tiene que haber tantos botones como resultados. 
 
 6. **Presentar registro provisional y permitir modificaciones**  
    - Una vez recopilados todos los campos, muestra al usuario algo como:  
