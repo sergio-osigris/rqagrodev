@@ -21,13 +21,14 @@ OPTIMLY_BASE_URL = os.getenv("OPTIMLY_BASE_URL")
 USE_OPTIMLY = os.getenv("USE_OPTIMLY", "false").lower() in ("true", "1", "yes")
 import re
 
-BUTTON_REGEX = r"\[button:(.*?)\]"
+BUTTON_REGEX = r"\[button:([^\]]+)\]"
 
-def extract_buttons(text: str):
+def extract_buttons(text):
     match = re.search(BUTTON_REGEX, text)
-    if not match:
-        return []
-    return [b.strip() for b in match.group(1).split("|") if b.strip()]
+    if match:
+        titles = match.group(1).split("|")
+        return [title.strip() for title in titles]
+    return []
 
 class WhatsAppMessageHandler:
     def __init__(
@@ -96,16 +97,16 @@ class WhatsAppMessageHandler:
         }
     
     def build_list_payload(self, recipient: str, text: str, options: list):
-        rows = [{"id": opt, "title": opt[:24]} for opt in options[:10]]
+        rows = [{"id": opt, "title": opt[:24]} for opt in options]  # título máx 24 chars
         return {
             "messaging_product": "whatsapp",
             "to": recipient,
             "type": "interactive",
             "interactive": {
                 "type": "list",
-                "body": {"text": re.sub(BUTTON_REGEX, '', text).strip()},
+                "body": {"text": text},
                 "action": {
-                    "button": "Ver opciones",
+                    "button": "Ver opciones",  # texto del botón que abre el menú
                     "sections": [
                         {
                             "title": "Cultivos disponibles",
@@ -147,11 +148,9 @@ class WhatsAppMessageHandler:
             if len(button_titles) > 3 or any(len(t) > 20 for t in button_titles):
                 payload = self.build_list_payload(recipient, text, button_titles)
             else:
-                payload = self.build_list_payload(recipient, text, button_titles)
-            print(json.dumps(payload, indent=2))
+                payload = self.build_button_payload(recipient, text, button_titles)
             data = json.dumps(payload)
         else:
-            print("ERROR")
             data = self.get_text_message_input(recipient, text)
 
         async with aiohttp.ClientSession() as session:
