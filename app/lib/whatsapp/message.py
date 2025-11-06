@@ -77,6 +77,7 @@ class WhatsAppMessageHandler:
             logging.info("Detected new record added. Deleting chat history")
             self.clear_chat_history(phone_number)
         return output_text
+    
     def build_button_payload(self,recipient:str, text:str, button_titles:dict):
         buttons = [
             {"type": "reply", "reply": {"id": f"btn_{i}", "title": title}}
@@ -95,6 +96,27 @@ class WhatsAppMessageHandler:
             }
         }
     
+    def build_list_payload(self, recipient: str, text: str, options: list):
+        rows = [{"id": opt, "title": opt[:24]} for opt in options]  # título máx 24 chars
+        return {
+            "messaging_product": "whatsapp",
+            "to": recipient,
+            "type": "interactive",
+            "interactive": {
+                "type": "list",
+                "body": {"text": text},
+                "action": {
+                    "button": "Ver opciones",  # texto del botón que abre el menú
+                    "sections": [
+                        {
+                            "title": "Cultivos disponibles",
+                            "rows": rows
+                        }
+                    ],
+                },
+            },
+        }
+
     def get_text_message_input(self, recipient: str, text: str) -> str:
         """
         Prepare the JSON payload for a text message.
@@ -122,10 +144,15 @@ class WhatsAppMessageHandler:
         )
         button_titles = extract_buttons(text)
         if button_titles:
-            payload = self.build_button_payload(recipient, text, button_titles)
+            # Si hay más de 3 opciones o alguna supera 20 caracteres → usar menú
+            if len(button_titles) > 3 or any(len(t) > 20 for t in button_titles):
+                payload = self.build_list_payload(recipient, text, button_titles)
+            else:
+                payload = self.build_button_payload(recipient, text, button_titles)
             data = json.dumps(payload)
         else:
             data = self.get_text_message_input(recipient, text)
+
         async with aiohttp.ClientSession() as session:
             async with session.post(url, data=data, headers=headers) as response:
                 if response.status == 200:
