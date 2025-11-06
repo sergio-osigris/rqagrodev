@@ -147,7 +147,7 @@ class WhatsAppMessageHandler:
             if len(button_titles) > 3 or any(len(t) > 20 for t in button_titles):
                 payload = self.build_list_payload(recipient, text, button_titles)
             else:
-                payload = self.build_button_payload(recipient, text, button_titles)
+                payload = self.build_list_payload(recipient, text, button_titles)
             data = json.dumps(payload)
         else:
             data = self.get_text_message_input(recipient, text)
