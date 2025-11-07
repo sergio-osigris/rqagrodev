@@ -4,11 +4,36 @@ import logging
 import requests
 
 API_URL = "https://qnur3yjwqg.execute-api.eu-west-3.amazonaws.com"  
-ACCESS_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpZCI6ImQ4ODJhN2RjMWY5YTk1YTkwNmNiYTg1NTlkOGM3MzU2NzJlNDgwYTgiLCJqdGkiOiJkODgyYTdkYzFmOWE5NWE5MDZjYmE4NTU5ZDhjNzM1NjcyZTQ4MGE4IiwiaXNzIjoiIiwiYXVkIjoib1NJR3JpcyIsInN1YiI6IjgiLCJ1c2VyaWQiOiI4IiwidXNlcm5hbWUiOiJhZG1pbnNlcmdpbyIsImVtYWlsIjoic2NhbWJlaXJvQG9zaWdyaXMuY29tIiwibm9tYnJlIjoiU2VyZ2lvIiwiYXBlbGxpZG8iOiJDYW1iZWlybyIsImV4cCI6MTc2MjUxMzg4NSwiaWF0IjoxNzYyNTEwMjg1LCJ0b2tlbl90eXBlIjoiYmVhcmVyIiwic2NvcGUiOiJpbnRlcm5hbF91c2VyIn0.Td0Izsk5yMrbrYMW6LQdV5gx-rypLO_L7hm-WEYKTAU6H5lSpOJWqFY7U5Fh_BF3PAk02SIvNaV0EFWsB4yz-IU-OAICx-_rxx2_4_vlmO9Y0Ox4DK0n48nm5KsyBZwkQ1hrbsx99ScF8eFYncDgvInMs32yV_MHle_HScxlFYmo4fMyDTsDWA_pqfGnC2hpFWJdmBWGvfBYzwziZtBZc4XYfbjcmrnyoDfEUOfu1R01e6gonX_0h1K43Cf-Kje3wKnHa63_8VopNJaBSbvv4X0p_Vu0sSyjme_C_Vznx3nJDEqqIF_txD2rY0Atbl4mQ5NLiltekTWSgfroCu1wtg"
 
+def obtener_access_token() -> str:
+    url = "https://qnur3yjwqg.execute-api.eu-west-3.amazonaws.com/osigrisapi/oauth2/authentication/"
+    
+    data = {
+        "grant_type": "password",
+        "client_id": "oSIGris",
+        "client_secret": "UjxBOYDatIElyO9NNPWWv1RMmfKPmZ44ILdzFXwgOaHt3teeaISaqvTLOw2uyUuU",
+        "username": "adminsergio",
+        "password": "sOsicr.23"
+    }
+
+    try:
+        resp = requests.post(url, data=data, timeout=10)
+        resp.raise_for_status()
+        json_resp = resp.json()
+        access_token = json_resp.get("access_token")
+        if access_token:
+            return access_token
+        else:
+            print("⚠️ No se encontró 'access_token' en la respuesta:", json_resp)
+            return None
+    except requests.RequestException as e:
+        print(f"❌ Error al obtener token: {e}")
+        return None
+    
 def hacer_peticion_get(url) -> str:
+    access_token = obtener_access_token()
     headers = {
-        "Authorization": f"Bearer {ACCESS_TOKEN}",
+        "Authorization": f"Bearer {access_token}",
         "Accept": "application/json"
     }
     try:
