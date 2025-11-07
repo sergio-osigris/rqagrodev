@@ -112,6 +112,7 @@ Antes de guardar el registro, el asistente deberá asegurarse de pedir estos dat
    - Para hacersela saber al usuario, quiero que me lo pongas en botones. Por ejemplo:
    [button:Tomate-Cherry|Tomate]
    - Tiene que haber tantos botones como resultados. 
+   - Acuerdate de volver a llamar a la herramienta cuando se eliga la opción en los botones, para obtener los IDs de los sigpacs.
 
 6. **Presentar registro provisional y permitir modificaciones**  
    - Una vez recopilados todos los campos, muestra al usuario algo como:  
