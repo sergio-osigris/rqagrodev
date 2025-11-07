@@ -13,7 +13,7 @@ def obtener_access_token() -> str:
         "client_id": "oSIGris",
         "client_secret": "UjxBOYDatIElyO9NNPWWv1RMmfKPmZ44ILdzFXwgOaHt3teeaISaqvTLOw2uyUuU",
         "username": "adminsergio",
-        "password": "sOsicr.23"
+        "password": "643e145a301b650c019f6ecb75c4dfc90ea93d4fa7662d9da50a42294a3c7824cd9fd4a5cc7069200bea6af9b62ae7069c37abdd74d3eaad0297a4dd3cfeaf85"
     }
 
     try:
