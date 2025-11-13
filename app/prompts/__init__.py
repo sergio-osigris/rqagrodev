@@ -72,23 +72,33 @@ Antes de guardar el registro, el asistente deberá asegurarse de pedir estos dat
    - Campos esperados (ejemplo mínimo):  
      1. Nombre del fitosanitario (validado con CheckFitosanitario la primera vez).  
      2. Dosis/cantidad aplicada.  
-     3. Cultivo (e.g., “maíz”, “trigo”).  
-     4. Campaña
-     5. Año de la campaña
-     6. Aplicador o ubicación (“campo de XX”).  
-     7. Fecha (por defecto la fecha actual, a menos que el usuario indique otra).  
+     3. Medida dosis.
+     4. Cultivo (e.g., “maíz”, “trigo”).  
+     5. Campaña
+     6. Año de la campaña
+     7. Aplicador o ubicación (“campo de XX”).  
+     8. Fecha (por defecto la fecha actual, a menos que el usuario indique otra).  
    - Para cada campo:
      - Si el usuario lo menciona en la misma frase, extráelo.  
-     - Si faltan el **nombre del fitosanitario** (gestionado en el paso 2), la **dosis**, el **cultivo**, la **campaña** o el **año de la campaña** pregunta específicamente por el dato faltante:  
+     - Si faltan el **nombre del fitosanitario** (gestionado en el paso 2), la **dosis**, la **medida dosis**, el **cultivo**, la **campaña** o el **año de la campaña** pregunta específicamente por el dato faltante:  
        > “¿Qué dosis aplicaste?”  
        > “¿En qué cultivo?”  
        > “¿Cómo se llama la campaña?”  
        > “¿De que año es la campaña?”  
+       > “¿Cuál es la medida de la dosis que aplicaste?”  
      - (No preguntes proactivamente por otros campos como Aplicador, Superficie, etc., a menos que el usuario inicie una modificación sobre ellos en el paso 5).
+   - Para el campo Medida dosis, transformar la unidad a simbolo del sistema internacional. Por ejemplo, el usuario escribe algo como:  
+     > “He aplicado 50 kilogramos por hectarea de Fitomax 250 EC en el cultivo de maíz en la campaña exploprueba del año 2025.”  
+   - El agente extrae kilogramos por hectarea y lo convierte en kg/ha.   
+   - Existen 4 casos que no se comtemplan en el sistema internacional de simbolos: 
+     > Difusor por metro cúbico:	dif./m³  (difusor siempre será dif.)
+     > Tableta por metro cúbico:	tab./m³  (tableta siempre será tab.)
+     > Trampa por metro cúbico:	trap./m³   (trampa siempre será trap.)
+     > Miligramo por dispensador:	mg/disp. (dispensador siempre será disp.)
  
 4. **Recepción de año y nombre de la campaña**  
    - El usuario escribe algo como:  
-     > “He aplicado 50kg de Fitomax 250 EC en el cultivo de maíz en la campaña exploprueba del año 2025.”  
+     > “He aplicado 50 kilogramos por hectarea de Fitomax 250 EC en el cultivo de maíz en la campaña exploprueba del año 2025.”  
    - El agente extrae “exploprueba” y “2025” y llama a ComprobarExplotacion(“exploprueba”, “2025”).  
    - Si ComprobarExplotacion devuelve un resultado negativo, pide al usuario los datos de nuevo:  
      > “No encuentro esa campaña en ese año. ¿Podrías verificar o escribirlo de nuevo?”
