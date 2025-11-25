@@ -15,6 +15,8 @@ class Record(BaseModel):
     Tratamiento_fertilizante_labor: str = Field(..., alias="Tratamiento/ fertilizante / labor", description="Nombre específico del tratamiento, producto fertilizante, o tipo de labor realizada. Ejemplos: 'Azoxystrobin 25%', 'Abonado de fondo NPK 15-15-15', 'Poda de formación', 'Siembra directa'.")
     Campaña: str = Field("", alias="Nombre de la campaña", description="Nombre/alias específico de la campaña. Ejemplos: 'Prueba', 'Explotacion'.")
     Año_campaña: str = Field("", alias="Año de la campaña", description="Año en el que se realiza la campaña. Ejemplos: '2023', '2024', '2022', '2025'.")
+    Medida_dosis: Optional[str] = Field("", alias="Medida de la dosis", description="Medida de la dosis aplicada. Ejemplos: 'kg/ha', 'l/ha'.")
+    Dimension: Optional[str] = Field("", alias="Dimension", description="Dimension de la parcela. Ejemplos: '100.541', '145'.")
     Problema_en_campo: Optional[str] = Field(..., alias="Problema en campo", description="Descripción detallada del problema o plaga detectada en el campo que motivó la acción. Ejemplos: 'Fuerte ataque de mildiu en hojas basales', 'Clorosis férrica en brotes jóvenes', 'Compactación del suelo post-lluvias'.")
     Dosis: Optional[str] = Field(..., title="Dosis Aplicada", description="Cantidad del producto (fitosanitario o fertilizante) aplicado, especificando las unidades. Ejemplos: '1.5 L/ha', '300 kg/ha', '2 cc/L de agua'.")
     Caldo: Optional[str] = Field(..., title="Tipo de Caldo o Mezcla", description="Descripción del tipo de mezcla o solución utilizada, si aplica, especialmente para fitosanitarios. No la cantidad, sino la naturaleza. Ejemplos: 'Suspensión concentrada (SC)', 'Mojante + Fungicida', 'Solución madre'. Si es una cantidad, usar el campo Dosis o especificar aquí si es volumen total de mezcla. Para aplicaciones en seco, puede ser 'No aplica' o nulo.")
@@ -41,6 +43,8 @@ class Record(BaseModel):
                 "Año_campaña": "2025",
                 "Problema en campo": "Presencia de oidio en hojas de pepino",
                 "Dosis": "0.5 L/ha",
+                "Medida_dosis": "L/ha",
+                "Dimension": "145.023",
                 "Caldo": "Mezcla con adherente YZ",
                 "Cultivo": "Pepino Almería - Invernadero Norte",
                 "Superficie": 2.5,
@@ -69,6 +73,8 @@ class RecordRequest(BaseModel):
     Año_campaña: str = Field("", alias="Año de la campaña", description="Año en el que se realiza la campaña. Ejemplos: '2023', '2024', '2022', '2025'.")
     Problema_en_campo: Optional[str] = Field("", alias="Problema en campo", description="Descripción textual del problema observado en el campo que motivó la acción. Ejemplos: 'Pulgón en tomate', 'Mildiu en vid', 'Necesidad de aporte de nitrógeno', 'Terreno compactado'.")
     Dosis: Optional[str] = Field("", title="Dosis Aplicada", description="Cantidad del producto (fitosanitario o fertilizante) aplicado, incluyendo unidades. Fundamental para el seguimiento y la seguridad. Ejemplo: '50 kg'.")
+    Medida_dosis: Optional[str] = Field("", alias="Medida de la dosis", description="Medida de la dosis aplicada. Ejemplos: 'kg/ha', 'l/ha'.")
+    Dimension: Optional[str] = Field("", alias="Dimension", description="Dimension de la parcela. Ejemplos: '100.541', '145'.")
     Cultivo: Optional[str] = Field("", title="Cultivo Tratado", description="Nombre del cultivo específico que recibió la aplicación o sobre el cual se realizó la labor. Ejemplos: 'Tomate pera', 'Viñedo Tempranillo', 'Trigo duro', 'Oliveral Picual'.")
     Superficie: Optional[float] = Field(None, title="Superficie (ha)", description="Área total del terreno donde se realizó la aplicación o labor, expresada en hectáreas (ha). Ejemplo: 10.5.")
     Fecha: date = Field(default_factory=date.today, title="Fecha de Aplicación/Labor", description="Fecha en la que se realizó la aplicación del producto o la labor agrícola. Formato esperado: AAAA-MM-DD. Por defecto, se usará la fecha actual.")
@@ -88,6 +94,8 @@ class RecordRequest(BaseModel):
                 "Año_campaña": "2025",
                 "Problema en campo": "Ataque severo de mildiu en hojas",
                 "Dosis": "10kg ",
+                "Medida_dosis": "L/ha",
+                "Dimension": "145.023",
                 "Cultivo": "Viñedo - variedad Albariño",
                 "Superficie": 12.5,
                 "Fecha": "2024-07-15",

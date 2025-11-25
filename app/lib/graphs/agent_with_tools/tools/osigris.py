@@ -86,7 +86,8 @@ def validar_cultivo(cultivo: str, id_campaña: str, variedad: str) -> str:
     if valido=="si":
         if len(datos) == 1:
             sigpacs_id=[item["id"] for item in datos[0]["sigpac"]]
-            return f"Cultivo comprobado correctamente en campaña. IDs de sigpacs obtenidos: {sigpacs_id}"
+            dimension = datos[0]["dimension"]
+            return f"Cultivo comprobado correctamente en campaña. IDs de sigpacs obtenidos: {sigpacs_id}. Dimension: {dimension}"
         else:
             nombres = []
             for d in datos:
