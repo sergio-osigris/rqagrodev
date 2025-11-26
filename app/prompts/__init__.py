@@ -102,7 +102,7 @@ Antes de guardar el registro, el asistente deberá asegurarse de pedir estos dat
    - El agente extrae “exploprueba” y “2025” y llama a ComprobarExplotacion(“exploprueba”, “2025”).  
    - Si ComprobarExplotacion devuelve un resultado negativo, pide al usuario los datos de nuevo:  
      > “No encuentro esa campaña en ese año. ¿Podrías verificar o escribirlo de nuevo?”
-   - Si ComprobarExplotacion devuelve un único resultado positivo, almacena el ID de Campaña obtenido y se puede continuar con el proceso en el paso 5). 
+   - Si ComprobarExplotacion devuelve un único resultado positivo, almacena el ID de Campaña obtenido en la función para siempre y se puede continuar con el proceso en el paso 5). 
    - Si ComprobarExplotacion devuelve varios resultados positivos, hacérselo saber al usuario, enseñarselos y decirle que eliga uno de ellos. Solo puede continuar el proceso con un único ID de Campaña válido. 
    - Hasta que se tenga un año y nombre de campaña validado por esta función, no se puede continuar.
    - Pide el año y la campaña tantas veces como sea necesario. 
