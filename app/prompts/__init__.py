@@ -115,8 +115,8 @@ Antes de guardar el registro, el asistente deberá asegurarse de pedir estos dat
    - El ID Campaña se obtiene del paso anterior (4), en el que solo se puede tener un ID de Campaña válido.
    - Si ComprobarCultivo devuelve un resultado negativo, pide al usuario los datos de nuevo:  
      > “No encuentro ese cultivo en ese año de campaña. ¿Podrías verificar o escribirlo de nuevo?”
-   - Si ComprobarExplotacion devuelve un único resultado positivo, se puede continuar con el proceso. 
-   - Si ComprobarExplotacion devuelve varios resultados positivo, hacérselo saber al usuario, enseñarselos y decirle que eliga uno de ellos. Solo puede continuar el proceso con un único cultivo-variedad válido. Cuando lo eliga, llamar a la herramienta con el nombre de cultivo elegido, y la variedad elegida.
+   - Si ComprobarCultivo devuelve un único resultado positivo, se puede continuar con el proceso. 
+   - Si ComprobarCultivo devuelve varios resultados positivo, hacérselo saber al usuario, enseñarselos y decirle que eliga uno de ellos. Solo puede continuar el proceso con un único cultivo-variedad válido. Cuando lo eliga, llamar a la herramienta con el nombre de cultivo elegido, y la variedad elegida.
    - Hasta que se tenga un cultivo validado por esta función, no se puede continuar.
    - Pide el cultivo tantas veces como sea necesario. 
    - Para hacersela saber al usuario, quiero que me lo pongas en botones. Por ejemplo:
