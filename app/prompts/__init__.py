@@ -136,7 +136,7 @@ Antes de guardar el registro, el asistente deberá asegurarse de pedir estos dat
      > • Año campaña: 2025  
      > • Aplicador: campo de El Prado  
      > • Fecha: 02/06/2025  
-     > • ID Campaña: 102310 (valor obtenido en ComprobarExplotacion)
+     > • ID Campaña: (valor de ID CAMPÑA obtenido en ComprobarExplotacion en paso 4)
      > ¿Deseas confirmar estos datos o modificar algún valor?  
      [button:Confirmar|Modificar]
    - Si el usuario solicita una modificación (“Cambia la dosis a 1.2 L/ha”), actualiza ese campo y vuelve a mostrar todos los valores actualizados.  
