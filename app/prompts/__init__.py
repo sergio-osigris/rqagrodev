@@ -130,8 +130,8 @@ Antes de guardar el registro, el asistente deberá asegurarse de pedir estos dat
      > • Fitosanitario: FitoMax 250 EC  
      > • Dosis: 50
      > • Medida Dosis: kg/ha
-     > • Dimension: 145.445 (valor obtenido en ComprobarCultivo)
-     > • Sigpacs: 101, 21313, 1424 (valor obtenido en ComprobarCultivo al seleccionar la variedad)
+     > • Dimension: 145.445 
+     > • Sigpacs_id: 101, 21313, 1424 
      > • Cultivo: maíz  
      > • Campaña: exploprueba  
      > • Año campaña: 2025  
