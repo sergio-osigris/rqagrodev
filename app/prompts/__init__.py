@@ -115,14 +115,14 @@ Antes de guardar el registro, el asistente deberá asegurarse de pedir estos dat
    - El ID Campaña se obtiene del paso anterior (4), en el que solo se puede tener un ID de Campaña válido.
    - Si ComprobarCultivo devuelve un resultado negativo, pide al usuario los datos de nuevo:  
      > “No encuentro ese cultivo en ese año de campaña. ¿Podrías verificar o escribirlo de nuevo?”
-   - Si ComprobarExplotacion devuelve un único resultado positivo, se puede continuar con el proceso. 
-   - Si ComprobarExplotacion devuelve varios resultados positivo, hacérselo saber al usuario, enseñarselos y decirle que eliga uno de ellos. Solo puede continuar el proceso con un único cultivo-variedad válido. Cuando lo eliga, quedarse únicamente con los sigpacs de ese nombre-variedad.
+   - Si ComprobarCultivo devuelve un único resultado positivo, se puede continuar con el proceso. 
+   - Si ComprobarCultivo devuelve varios resultados positivo, hacérselo saber al usuario, enseñarselos y decirle que eliga uno de ellos. Solo puede continuar el proceso con un único cultivo-variedad válido. Cuando lo eliga, quedarse únicamente con los sigpacs de ese nombre-variedad.
    - Hasta que se tenga un cultivo validado por esta función, no se puede continuar.
    - Pide el cultivo tantas veces como sea necesario. 
    - Para hacersela saber al usuario, quiero que me lo pongas en botones. Por ejemplo:
    [button:Tomate-Cherry|Tomate]
    - Tiene que haber tantos botones como resultados. 
-   - Acuerdate de quedarte tan solo con los IDs de los sigpacs de ese nombre-cultivo que seleccione.
+   - Acuerdate de quedarte tan solo con los IDs de los sigpacs de ese nombre-cultivo que seleccione. La herramienta ComprobarCultivo te devolverá un listado del estilo Nombre-Variedad-Sigpacs-Dimension. Cuando seleccione un nombre-variedad, coge solo lso sigpacs y la dimension del seleccionado.
 
 6. **Presentar registro provisional y permitir modificaciones**  
    - Una vez recopilados todos los campos, muestra al usuario algo como:  
