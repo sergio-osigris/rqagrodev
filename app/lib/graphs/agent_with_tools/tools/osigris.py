@@ -90,13 +90,14 @@ def validar_cultivo(cultivo: str, id_campaña: str, variedad: str) -> str:
             return f"Cultivo comprobado correctamente en campaña. IDs de sigpacs obtenidos: {sigpacs_id}. Dimension: {dimension}"
         else:
             nombres = []
-            cultivos_sigpacs = []
+            datos_cutlvio_variedad = []
             for d in datos:
                 nombre = d["subtype"]["typecrop"]["name"]
                 variedad = d["subtype"]["name"]
                 nombres.append(f"{nombre}-{variedad}")
                 sigpacs_id = [item["id"] for item in d["sigpac"]]
-                cultivos_sigpacs.append(f"{nombre}-{variedad}:{sigpacs_id}")
-            return f"Existen varios cultivos en la campaña indicada. Elige uno de estos cultivos-variedad: {nombres}. Sigpacs obtenidos: {cultivos_sigpacs}"   
+                dimension = d["dimension"]
+                datos_cutlvio_variedad.append(f"Nombre:{nombre} Variedad:{variedad} Sigpacs:{sigpacs_id} Dimension: {dimension}")
+            return f"Existen varios cultivos en la campaña indicada. Elige uno de estos cultivos-variedad: {nombres}. Datos de los cultivos variedad obtenidos: {datos_cutlvio_variedad}."   
     else:
         return f"No encuentro ningún cultivo en la campaña indicada"

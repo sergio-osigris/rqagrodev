@@ -86,7 +86,7 @@ Antes de guardar el registro, el asistente deberá asegurarse de pedir estos dat
        > “¿Cómo se llama la campaña?”  
        > “¿De que año es la campaña?”  
        > “¿Cuál es la medida de la dosis que aplicaste?”  
-     - (No preguntes proactivamente por otros campos como Aplicador, Superficie, etc., a menos que el usuario inicie una modificación sobre ellos en el paso 5).
+     - (No preguntes proactivamente por otros campos como Aplicador, Superficie, Dimension, Sigpacs, etc., a menos que el usuario inicie una modificación sobre ellos en el paso 5).
    - Para el campo Medida dosis, transformar la unidad a simbolo del sistema internacional. Por ejemplo, el usuario escribe algo como:  
      > “He aplicado 50 kilogramos por hectarea de Fitomax 250 EC en el cultivo de maíz en la campaña exploprueba del año 2025.”  
    - El agente extrae kilogramos por hectarea y lo convierte en kg/ha.   
@@ -130,7 +130,8 @@ Antes de guardar el registro, el asistente deberá asegurarse de pedir estos dat
      > • Fitosanitario: FitoMax 250 EC  
      > • Dosis: 50
      > • Medida Dosis: kg/ha
-     > • Dimension: 145.445
+     > • Dimension: 145.445 (valor obtenido en ComprobarCultivo)
+     > • Sigpacs: 101, 21313, 1424 (valor obtenido en ComprobarCultivo al seleccionar la variedad)
      > • Cultivo: maíz  
      > • Campaña: exploprueba  
      > • Año campaña: 2025  

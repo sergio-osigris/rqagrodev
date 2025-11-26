@@ -17,6 +17,7 @@ class Record(BaseModel):
     Año_campaña: str = Field("", alias="Año de la campaña", description="Año en el que se realiza la campaña. Ejemplos: '2023', '2024', '2022', '2025'.")
     Medida_dosis: Optional[str] = Field("", alias="Medida de la dosis", description="Medida de la dosis aplicada. Ejemplos: 'kg/ha', 'l/ha'.")
     Dimension: Optional[str] = Field("", alias="Dimension", description="Dimension de la parcela. Ejemplos: '100.541', '145'.")
+    Sigpacs: Optional[str] = Field("", alias="Sigpacs", description="IDs de lo sigpacs obtenidos. Ejemplos: '101, 102, 103', '11, 13141, 1421414'.")
     Problema_en_campo: Optional[str] = Field(..., alias="Problema en campo", description="Descripción detallada del problema o plaga detectada en el campo que motivó la acción. Ejemplos: 'Fuerte ataque de mildiu en hojas basales', 'Clorosis férrica en brotes jóvenes', 'Compactación del suelo post-lluvias'.")
     Dosis: Optional[str] = Field(..., title="Dosis Aplicada", description="Cantidad del producto (fitosanitario o fertilizante) aplicado, especificando las unidades. Ejemplos: '1.5 L/ha', '300 kg/ha', '2 cc/L de agua'.")
     Caldo: Optional[str] = Field(..., title="Tipo de Caldo o Mezcla", description="Descripción del tipo de mezcla o solución utilizada, si aplica, especialmente para fitosanitarios. No la cantidad, sino la naturaleza. Ejemplos: 'Suspensión concentrada (SC)', 'Mojante + Fungicida', 'Solución madre'. Si es una cantidad, usar el campo Dosis o especificar aquí si es volumen total de mezcla. Para aplicaciones en seco, puede ser 'No aplica' o nulo.")
@@ -45,6 +46,7 @@ class Record(BaseModel):
                 "Dosis": "0.5 L/ha",
                 "Medida_dosis": "L/ha",
                 "Dimension": "145.023",
+                "Sigpacs": "101, 130213, 41249",
                 "Caldo": "Mezcla con adherente YZ",
                 "Cultivo": "Pepino Almería - Invernadero Norte",
                 "Superficie": 2.5,
@@ -75,6 +77,7 @@ class RecordRequest(BaseModel):
     Dosis: Optional[str] = Field("", title="Dosis Aplicada", description="Cantidad del producto (fitosanitario o fertilizante) aplicado, incluyendo unidades. Fundamental para el seguimiento y la seguridad. Ejemplo: '50 kg'.")
     Medida_dosis: Optional[str] = Field("", alias="Medida de la dosis", description="Medida de la dosis aplicada. Ejemplos: 'kg/ha', 'l/ha'.")
     Dimension: Optional[str] = Field("", alias="Dimension", description="Dimension de la parcela. Ejemplos: '100.541', '145'.")
+    Sigpacs: Optional[str] = Field("", alias="Sigpacs", description="IDs de lo sigpacs obtenidos. Ejemplos: '101, 102, 103', '11, 13141, 1421414'.")
     Cultivo: Optional[str] = Field("", title="Cultivo Tratado", description="Nombre del cultivo específico que recibió la aplicación o sobre el cual se realizó la labor. Ejemplos: 'Tomate pera', 'Viñedo Tempranillo', 'Trigo duro', 'Oliveral Picual'.")
     Superficie: Optional[float] = Field(None, title="Superficie (ha)", description="Área total del terreno donde se realizó la aplicación o labor, expresada en hectáreas (ha). Ejemplo: 10.5.")
     Fecha: date = Field(default_factory=date.today, title="Fecha de Aplicación/Labor", description="Fecha en la que se realizó la aplicación del producto o la labor agrícola. Formato esperado: AAAA-MM-DD. Por defecto, se usará la fecha actual.")
@@ -95,6 +98,7 @@ class RecordRequest(BaseModel):
                 "Problema en campo": "Ataque severo de mildiu en hojas",
                 "Dosis": "10kg ",
                 "Medida_dosis": "L/ha",
+                "Sigpacs": "101, 130213, 41249",
                 "Dimension": "145.023",
                 "Cultivo": "Viñedo - variedad Albariño",
                 "Superficie": 12.5,
