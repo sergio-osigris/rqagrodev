@@ -97,7 +97,7 @@ def validar_cultivo(cultivo: str, id_campaña: str, variedad: str) -> str:
                 nombres.append(f"{nombre}-{variedad}")
                 sigpacs_id = [item["id"] for item in d["sigpac"]]
                 dimension = d["dimension"]
-                datos_cutlvio_variedad.append(f"Nombre:{nombre} Variedad:{variedad} Sigpacs:{sigpacs_id} Dimension: {dimension}")
+                datos_cutlvio_variedad.append(f"{nombre}-{variedad} Sigpacs:{sigpacs_id} Dimension: {dimension}")
             logging.info(f"Existen varios cultivos en la campaña indicada. Elige uno de estos cultivos-variedad: {nombres}. Datos de los cultivos variedad obtenidos: {datos_cutlvio_variedad}.")
             return f"Existen varios cultivos en la campaña indicada. Elige uno de estos cultivos-variedad: {nombres}. Datos de los cultivos variedad obtenidos: {datos_cutlvio_variedad}."   
     else:
