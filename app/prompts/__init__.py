@@ -107,9 +107,9 @@ Antes de guardar el registro, el asistente deberá asegurarse de pedir estos dat
    - Solo se puede tener un ID de Campaña válido, ya sea el único que devuelva la función, o uno elegido dentro de la lista que devuelva en caso de que existan varios.
 
 5. **Recepción de cultivo**  
-   - El usuario escribe algo como:  
-     > “He aplicado 50kg de Fitomax 250 EC en el cultivo de maíz en la campaña exploprueba del año 2025.”  
-   - El agente extrae “maíz” y llama a la herramienta ComprobarCultivo(“maíz”, ID Campaña).  
+   - Una vez comprobado la explotación del paso 4), tomamos como referencia el texto que el usuario escribe:  
+     > “He aplicado 50 kilogramos por hectarea de Fitomax 250 EC en el cultivo de maíz en la campaña exploprueba del año 2025.”  
+   - El agente ahora extrae “maíz” y llama a la herramienta ComprobarCultivo(“maíz”, ID Campaña).  
    - El ID Campaña se obtiene del paso anterior (4), en el que solo se puede tener un ID de Campaña válido.
    - Si ComprobarCultivo devuelve un resultado negativo, pide al usuario los datos de nuevo:  
      > “No encuentro ese cultivo en ese año de campaña. ¿Podrías verificar o escribirlo de nuevo?”
