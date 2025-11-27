@@ -125,6 +125,7 @@ Antes de guardar el registro, el asistente deberá asegurarse de pedir estos dat
 
 
 6. **Presentar registro provisional y permitir modificaciones**  
+   - Para llegar a este paso, es obligatorio pasar por los pasos 4 y 5, y por las tools ComprobarExplotacion y ComprobarCultivo. Si no lo has hecho, hazlo ahora.
    - Una vez recopilados todos los campos, y obtenidos los resultados en ComprobarExplotacion y ComprobarCultivo, muestra al usuario algo como:  
      > “Estos son los datos que tengo para el registro provisional:  
      > • Fitosanitario: FitoMax 250 EC  
