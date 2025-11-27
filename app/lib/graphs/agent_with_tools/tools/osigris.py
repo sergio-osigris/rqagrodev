@@ -79,6 +79,7 @@ def validar_cultivo(cultivo: str, id_campaña: str, variedad: str) -> str:
     Arguments:
     - cultivo: Cultivo introducido por el usuario
     - id_campaña: Alias/nombre de la campaña obtenido en validar_explotacion
+    - variedad: Variedad del cultivo introducido por el usuario
     """
     logging.info(f"--Start ComprobarCultivo tool with arguments: {cultivo}, {id_campaña}, {variedad}")
     url = f"{API_URL}/osigrisapi/season/show/{id_campaña}/crop/list?qg1[and]=typecrop,typevariety&typecrop[in]={cultivo}&typevariety[in]={variedad}"

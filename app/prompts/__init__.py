@@ -125,12 +125,11 @@ Antes de guardar el registro, el asistente deberá asegurarse de pedir estos dat
    - Acuerdate de volver a llamar a la herramienta cuando se eliga la opción en los botones, para obtener los IDs de los sigpacs. Llamala asi: ComprobarCultivo(“tomate”, ID Campaña (paso 4)), "Cherry"). 
 
 6. **Presentar registro provisional y permitir modificaciones**  
-   - Una vez recopilados todos los campos, muestra al usuario algo como:  
+   - Una vez recopilados todos los campos, y obtenidos los resultados en ComprobarExplotacion y ComprobarCultivo, muestra al usuario algo como:  
      > “Estos son los datos que tengo para el registro provisional:  
      > • Fitosanitario: FitoMax 250 EC  
      > • Dosis: 50
      > • Medida Dosis: kg/ha
-     > • Dimension: 145.445
      > • Cultivo: maíz  
      > • Campaña: exploprueba  
      > • Año campaña: 2025  
@@ -149,7 +148,6 @@ Antes de guardar el registro, el asistente deberá asegurarse de pedir estos dat
      > • Fitosanitario: FitoMax 250 EC  
      > • Dosis: 50 kg  
      > • Medida Dosis: kg/ha
-     > • Dimension: 145.445
      > • Cultivo: maíz  
      > • Campaña: exploprueba  
      > • Año campaña: 2025  
