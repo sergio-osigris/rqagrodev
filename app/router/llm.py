@@ -13,7 +13,7 @@ from app.lib.graphs.agent_with_tools.tools.utils import get_current_date
 MODEL_VERSION = os.getenv("MODEL_VERSION")
 router = APIRouter()
 
-agent_with_tools_graph = ChatGraph(llm=ChatLLM().get_openai_llm(model_name=MODEL_VERSION), tools=[validar_cultivo, validar_explotacion,check_fitosanitarios,save_record,create_record,get_current_date,available_fitosanitarios]).graph()
+agent_with_tools_graph = ChatGraph(llm=ChatLLM().get_openai_llm(model_name=MODEL_VERSION), tools=[create_record,get_current_date]).graph()
 
 
 @router.post("/agent_with_tools")
