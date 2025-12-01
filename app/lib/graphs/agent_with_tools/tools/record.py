@@ -1,10 +1,11 @@
 from langchain_core.tools import tool
 from app.models.record import RecordRequest
+from app.models.record2 import RecordBase
 from app.interfaces.airtable import PostgresClient
 import logging
 
 @tool("CreateRecord", return_direct=True)
-def create_record(record : RecordRequest) -> RecordRequest:
+def create_record(record : RecordBase) -> RecordBase:
     """
     Usa esta herramienta para crear un registro de una incidencia fitosanitaria. 
     Esta herramienta no guarda el registro en la base de datos. SOLO la inicializa.

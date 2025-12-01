@@ -63,16 +63,18 @@ class WhatsAppMessageHandler:
     ) -> str:
         
         logging.debug(f"Current user info: {userInfo}")
-        state = ChatState(
-            messages=chat_history,
-            user_id=str(userInfo.get("user_id", "unknown_user")),
-            name=str(userInfo.get("name", "Desconocido")),
-        )
+        # state = ChatState(
+        #     messages=chat_history,
+        #     user_id=str(userInfo.get("user_id", "unknown_user")),
+        #     name=str(userInfo.get("name", "Desconocido")),
+        # )
+        state = self.get_prev_state(phone_number)
         logging.debug(f"Current state: {state}")
         response = await agent_with_tools_graph.ainvoke(state)
+        self.update_state(phone_number, response)
         output_text= response["messages"][-1]['content']
         logging.info(f"Assistant response: {output_text}")
-        self.add_to_history(phone_number, output_text, "assistant")
+        # self.add_to_history(phone_number, output_text, "assistant")
         if response.get("record_added",False) == True:
             logging.info("Detected new record added. Deleting chat history")
             self.clear_chat_history(phone_number)
@@ -305,6 +307,12 @@ class WhatsAppMessageHandler:
                 })
         self.chat_history[user_id].append({"role":sender, "content":message,"tool_call_id":id})
 
+    def update_state(self,user_id:str,state:ChatState):
+        self.chat_history[user_id] = state.messages
+
+    def get_prev_state(self,user_id:str):
+        state = self.chat_history.get(user_id, ChatState(messages=[], user_id=user_id, name="Desconocido"))
+        return state
 
     def get_chat_history(self, user_id: str):
         return self.chat_history.get(user_id, [])

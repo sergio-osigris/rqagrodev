@@ -3,7 +3,7 @@ import logging, re, json
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langchain.chat_models.base import BaseChatModel
 from langchain_core.tools import BaseTool
-from langgraph.prebuilt import ToolInvocation, ToolExecutor
+from langgraph.prebuilt import ToolNode
 from app.lib.graphs.agent_with_tools.state import ChatState
 
 
@@ -11,7 +11,7 @@ class ChatAgentActions:
     def __init__(self, llm: BaseChatModel, tools: list[BaseTool]):
         self.llm = llm
         self.tools = tools
-        self.tool_executor = ToolExecutor(tools=tools)
+        self.tool_executor = ToolNode(tools=tools)
 
     def call_model(self, state: ChatState):
         """
