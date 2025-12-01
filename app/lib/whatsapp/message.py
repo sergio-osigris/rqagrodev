@@ -310,9 +310,12 @@ class WhatsAppMessageHandler:
     def update_state(self,user_id:str,state:ChatState):
         self.chat_history[user_id] = state.messages
 
-    def get_prev_state(self,user_id:str):
-        state = self.chat_history.get(user_id, ChatState(messages=[], user_id=user_id, name="Desconocido"))
+    def get_prev_state(self, user_id: str):
+        messages = self.chat_history.get(user_id, [])
+        clean_messages = [{"role": m["role"], "content": m["content"]} for m in messages]
+        state = ChatState(messages=clean_messages, user_id=user_id, name="Desconocido")
         return state
+
 
     def get_chat_history(self, user_id: str):
         return self.chat_history.get(user_id, [])
