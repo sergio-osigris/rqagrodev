@@ -215,7 +215,7 @@ class WhatsAppMessageHandler:
         userInfo = await self._getUserInfo(wa_id)
 
         self.add_to_history(wa_id, user_message, "user",userInfo=userInfo)
-
+        # self.update_state(wa_id, response?)
         current_history = self.get_chat_history(wa_id)
 
         # Process the message to generate bot response
