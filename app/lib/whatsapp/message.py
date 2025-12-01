@@ -311,10 +311,27 @@ class WhatsAppMessageHandler:
         self.chat_history[user_id] = state.messages
 
     def get_prev_state(self, user_id: str):
-        messages = self.chat_history.get(user_id, [])
+        raw_state = self.chat_history.get(user_id)
+        if not raw_state:
+            # No hay historial, devuelvo nuevo estado vacío
+            return ChatState(messages=[], user_id=user_id, name="Desconocido")
+
+        # Si raw_state ya es un ChatState, devuélvelo
+        if isinstance(raw_state, ChatState):
+            return raw_state
+
+        # Si es dict o similar, intenta construir ChatState limpiando mensajes
+        if isinstance(raw_state, dict):
+            messages = raw_state.get("messages", [])
+        else:
+            # raw_state es probablemente una lista de mensajes (tu chat_history)
+            messages = raw_state
+
+        # Limpia los mensajes: solo role y content
         clean_messages = [{"role": m["role"], "content": m["content"]} for m in messages]
-        state = ChatState(messages=clean_messages, user_id=user_id, name="Desconocido")
-        return state
+
+        return ChatState(messages=clean_messages, user_id=user_id, name="Desconocido")
+
 
 
     def get_chat_history(self, user_id: str):
