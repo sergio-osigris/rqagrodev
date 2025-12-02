@@ -61,28 +61,36 @@ class WhatsAppMessageHandler:
         return userInfo[0]
 
     async def generate_response(
-        self, userInfo: dict, message: str, phone_number:str
+        self, userInfo: dict, message: str, phone_number: str
     ) -> str:
         
         logging.debug(f"Current user info: {userInfo}")
-        # state = ChatState(
-        #     messages=chat_history,
-        #     user_id=str(userInfo.get("user_id", "unknown_user")),
-        #     name=str(userInfo.get("name", "Desconocido")),
-        # )
+
+        # Recuperar estado previo como dict
         state = self.get_prev_state(phone_number, userInfo)
-        state.messages.append({"role": "user", "content": message})
+
+        # Añadir mensaje de usuario
+        state["messages"].append({"role": "user", "content": message})
+
         logging.debug(f"Current state: {state}")
+
+        # Ejecutar el grafo
         response = await agent_with_tools_graph.ainvoke(state)
+
+        # Guardar nuevo estado
         self.update_state(phone_number, response)
-        output_text= response["messages"][-1]['content']
+
+        # Sacar el último mensaje del asistente SIN meternos con .messages
+        output_text = response["messages"][-1]["content"]
         logging.info(f"Assistant response: {output_text}")
-        # self.add_to_history(phone_number, output_text, "assistant")
-        if response.get("record_added",False) == True:
+
+        # Si el registro se ha guardado definitivamente, limpiar estado de la conversación
+        if response.get("record_added", False) is True:
             logging.info("Detected new record added. Deleting chat history")
-            # self.clear_chat_history(phone_number)
             self.clear_state(phone_number)
+
         return output_text
+
     
     def build_button_payload(self,recipient:str, text:str, button_titles:dict):
         buttons = [
@@ -311,24 +319,53 @@ class WhatsAppMessageHandler:
     #             })
     #     self.chat_history[user_id].append({"role":sender, "content":message,"tool_call_id":id})
 
-    def update_state(self,user_id:str,state:ChatState):
-        self.chat_history[user_id] = state.messages
+    def update_state(self, user_id: str, state: dict):
+        # state es un AddableValuesDict (dict-like)
+        self.chat_history[user_id] = state
 
-    def get_prev_state(self,user_id:str,userInfo:Dict = None) -> ChatState:
-        state = self.chat_history.get(user_id, ChatState(messages=[({"role":"system", "content":AGENT_WITH_TOOLS_NODE.format(
+
+    def get_prev_state(self, user_id: str, userInfo: Dict = None) -> dict:
+        # Si ya tenemos estado previo para este usuario, lo usamos
+        existing = self.chat_history.get(user_id)
+        if existing is not None:
+            return existing
+
+        # Si no hay estado, inicializamos uno nuevo
+        userInfo = userInfo or {}
+        system_message = {
+            "role": "system",
+            "content": AGENT_WITH_TOOLS_NODE.format(
                 user_id=userInfo.get("user_id", "Desconocido"),
                 name=userInfo.get("name", "Desconocido"),
-                listado_campos=generar_listado_campos(RecordBase),current_date=datetime.datetime.now().strftime("%Y-%m-%d")
-                    ),"tool_call_id":"",
-                })], user_id=user_id, name=userInfo.get("name", "Desconocido"), record=RecordBase(Fecha=date.today(), Tratamiento_fitosanitario="",Campaña="",Año_Campaña="",Plaga="",Dosis=0, Medida_dosis="", Cultivo="", Superficie=0 )))
-        return state
+                listado_campos=generar_listado_campos(RecordBase),
+                current_date=datetime.datetime.now().strftime("%Y-%m-%d"),
+            ),
+        }
+
+        return {
+            "messages": [system_message],
+            "user_id": user_id,
+            "name": userInfo.get("name", "Desconocido"),
+            "record": RecordBase(
+                Fecha=date.today(),
+                Tratamiento_fitosanitario="",
+                Campaña="",
+                Año_Campaña="",
+                Plaga="",
+                Dosis=0,
+                Medida_dosis="",
+                Cultivo="",
+                Superficie=0,
+            ),
+            "record_added": False,
+        }
+
     
-    def clear_state(self,user_id:str):
-        if user_id in self.chat_history: 
-            self.chat_history[user_id] = None
-            self.chat_ids[user_id] = None
-        else:
-            logging.warning(f"User {user_id} not found in chat history")
+    def clear_state(self, user_id: str):
+        if user_id in self.chat_history:
+            self.chat_history.pop(user_id, None)
+        if user_id in self.chat_ids:
+            self.chat_ids.pop(user_id, None)
 
     # def get_chat_history(self, user_id: str):
     #     return self.chat_history.get(user_id, [])
