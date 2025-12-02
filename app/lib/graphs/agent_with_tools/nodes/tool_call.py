@@ -89,8 +89,10 @@ class CustomToolNode:
             # Aquí quieres guardar el RecordBase en el estado
             if isinstance(observation, RecordBase):
                 state.record = observation
+                state.record_added = True
             elif isinstance(observation, dict):
                 state.record = RecordBase(**observation)
+                state.record_added = True
             else:
                 # En caso raro, lo dejamos como está para no petar
                 logging.info(f"Unexpected type for CreateRecord observation: {type(observation)}")
