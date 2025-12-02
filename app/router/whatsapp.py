@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request
 from app.lib.whatsapp.utils import WhatsAppWebhook
+import logging
 
 router = APIRouter()
 whatsapp_webhook = WhatsAppWebhook()
@@ -12,4 +13,5 @@ async def verify_webhook(request: Request):
 
 @router.post("")
 async def handle_webhook(request: Request):
+    logging.info(request)
     return await whatsapp_webhook.handle_message(request)

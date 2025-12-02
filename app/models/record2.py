@@ -10,12 +10,12 @@ class RecordBase(BaseModel):
     """
     created_at: datetime = Field(default_factory=datetime.utcnow, title="Fecha de Creación", description="Marca de tiempo exacta (fecha y hora UTC) de cuándo se creó el registro en el sistema. Formato: AAAA-MM-DDTHH:MM:SSZ. Ejemplo: '2024-07-15T10:30:00Z'.")
     Fecha: Optional[date] = Field(..., title="Fecha de la Incidencia/Aplicación", description="Fecha principal en la que ocurrió la labor, aplicación o se observó la incidencia. Formato: AAAA-MM-DD. Ejemplo: '2024-07-14'.")
-    Tratamiento_fitosanitario: str = Field(..., alias="Nombre del fitosanitario", description="Nombre específico del tratamiento/producto fertilizante. Ejemplos: 'Azoxystrobin 25%', 'Metenal'.")
+    Tratamiento_fitosanitario: str = Field("", alias="Nombre del fitosanitario", description="Nombre específico del tratamiento/producto fertilizante. Ejemplos: 'Azoxystrobin 25%', 'Metenal'.")
     Campaña: str = Field("", alias="Nombre de la campaña", description="Nombre/alias específico de la campaña. Ejemplos: 'Prueba', 'Explotacion'.")
     Año_campaña: str = Field("", alias="Año de la campaña", description="Año en el que se realiza la campaña. Ejemplos: '2023', '2024', '2022', '2025'.")
     Plaga: str = Field(..., alias="Problema en campo", description="Descripción detallada del problema o plaga detectada en el campo que motivó la acción. Ejemplos: 'Fuerte ataque de mildiu en hojas basales', 'Clorosis férrica en brotes jóvenes', 'Compactación del suelo post-lluvias'.")
     Dosis: float = Field(..., title="Medida de la dosis aplicada", description="Medida de la cantidad del producto (fitosanitario o fertilizante) aplicado. Ejemplos: 'kg/ha', 'l/ha'.")
-    Medida_dosis: float = Field(..., title="Dosis Aplicada", description="Cantidad del producto (fitosanitario o fertilizante) aplicado. Ejemplos: '1.5', '300', '2'.")
+    Medida_dosis: str = Field(..., title="Dosis Aplicada", description="Cantidad del producto (fitosanitario o fertilizante) aplicado. Ejemplos: '1.5', '300', '2'.")
     Cultivo: str = Field(..., title="Cultivo Afectado/Tratado", description="Nombre del cultivo específico sobre el cual se realizó la acción o se observó el problema. Incluir variedad si es relevante. Ejemplos: 'Trigo candeal - Variedad Anton', 'Olivo - Picual', 'Tomate para industria'.")
     Superficie: Optional[float] = Field(..., title="Superficie Tratada/Afectada (ha)", description="Área total del terreno, expresada en hectáreas (ha), donde se realizó la aplicación, labor o se detectó el problema. Ejemplo: 25.5.")
 
@@ -30,7 +30,7 @@ class RecordBase(BaseModel):
                 "Año_campaña": "2025",
                 "Plaga": "Presencia de oidio en hojas de pepino",
                 "Dosis": "0.5",
-                "Medida dosis": "L/ha",
+                "Medida_dosis": "L/ha",
                 "Cultivo": "Pepino Almería - Invernadero Norte",
                 "Superficie": 2.5
             }

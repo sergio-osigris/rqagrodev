@@ -12,7 +12,7 @@ class ChatState(BaseModel):
     user_id: str = Field(description="User id from names table")
     name: str = Field(description="Full name of user")
     record_added: bool = Field(description="Indicates if the current conversation has already been saved to a new record.",default=False)
-    record: RecordBase = RecordBase()
+    record: RecordBase = Field(description="")
 
     class Config:
         arbitrary_types_allowed = True

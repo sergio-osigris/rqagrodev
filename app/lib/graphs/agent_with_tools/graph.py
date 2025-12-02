@@ -26,6 +26,7 @@ class ChatGraph:
             messages = state.messages
             last_message = messages[-1]
             text = last_message.get("content", "")
+            print("SHOULD "+text)
             if text.startswith("Calling ") and " with arguments " in text:
                 return "continue"
             return END

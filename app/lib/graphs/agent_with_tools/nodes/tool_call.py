@@ -1,6 +1,9 @@
 import json
 import re
-from langchain_core.tools import BaseTool
+from langchain.tools.base import BaseTool
+from langchain_core.messages import (
+    ToolMessage,
+)
 import uuid
 import logging
 from app.lib.graphs.agent_with_tools.state import ChatState
@@ -90,8 +93,12 @@ class CustomToolNode:
             if tool_name == "SaveRecord":
                 state.record_added = True
             if tool_name == "CreateRecord":
-                record = RecordBase(**observation)
-                state.record = record
+                state.record = observation
+                state.messages.append({
+                    "role": f"assistant",
+                    "content": f"Datos recolectados correctamente",
+                    'tool_call_id' : incoming_tool_id
+                })
         # If last message wasn’t a “Calling …” line, we do nothing (so no tool is run).
         return state
     

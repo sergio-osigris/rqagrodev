@@ -78,7 +78,8 @@ class WhatsAppMessageHandler:
         # self.add_to_history(phone_number, output_text, "assistant")
         if response.get("record_added",False) == True:
             logging.info("Detected new record added. Deleting chat history")
-            self.clear_chat_history(phone_number)
+            # self.clear_chat_history(phone_number)
+            self.clear_state(phone_number)
         return output_text
     
     def build_button_payload(self,recipient:str, text:str, button_titles:dict):
@@ -229,7 +230,7 @@ class WhatsAppMessageHandler:
                 response_text = "Received an image but could not extract media ID."
         elif msg_type == "audio":
             if media_id:
-                response_text = await self.generate_response(userInfo, current_history,wa_id)
+                response_text = await self.generate_response(userInfo, user_message,wa_id)
             else:
                 response_text = "Received an audio but could not extract media ID."
         else:
@@ -293,25 +294,25 @@ class WhatsAppMessageHandler:
                 logging.error(f"Failed to download media: {resp.status}")
                 return "Error downloading media file"
 
-    def add_to_history(self, user_id: str, message: str, sender: str,id:str = "",userInfo:Dict = None):
-        if user_id not in self.chat_history:
-            self.chat_history[user_id] = []
-            self.chat_ids[user_id] = None
-        if len(self.chat_history[user_id])==0:
-            logging.info(f"Initializing chat with system prompt")
-            self.chat_history[user_id].append({"role":"system", "content":AGENT_WITH_TOOLS_NODE.format(
-                user_id=userInfo.get("user_id", "Desconocido"),
-                name=userInfo.get("name", "Desconocido"),
-                size=userInfo.get("Hectáreas", "Desconocido"),
-                listado_campos=generar_listado_campos(RecordRequest),current_date=datetime.datetime.now().strftime("%Y-%m-%d")
-                    ),"tool_call_id":"",
-                })
-        self.chat_history[user_id].append({"role":sender, "content":message,"tool_call_id":id})
+    # def add_to_history(self, user_id: str, message: str, sender: str,id:str = "",userInfo:Dict = None):
+    #     if user_id not in self.chat_history:
+    #         self.chat_history[user_id] = []
+    #         self.chat_ids[user_id] = None
+    #     if len(self.chat_history[user_id])==0:
+    #         logging.info(f"Initializing chat with system prompt")
+    #         self.chat_history[user_id].append({"role":"system", "content":AGENT_WITH_TOOLS_NODE.format(
+    #             user_id=userInfo.get("user_id", "Desconocido"),
+    #             name=userInfo.get("name", "Desconocido"),
+    #             size=userInfo.get("Hectáreas", "Desconocido"),
+    #             listado_campos=generar_listado_campos(RecordRequest),current_date=datetime.datetime.now().strftime("%Y-%m-%d")
+    #                 ),"tool_call_id":"",
+    #             })
+    #     self.chat_history[user_id].append({"role":sender, "content":message,"tool_call_id":id})
 
     def update_state(self,user_id:str,state:ChatState):
         self.chat_history[user_id] = state.messages
 
-    def get_prev_state(self,user_id:str,userInfo:Dict = None):
+    def get_prev_state(self,user_id:str,userInfo:Dict = None) -> ChatState:
         state = self.chat_history.get(user_id, ChatState(messages=[({"role":"system", "content":AGENT_WITH_TOOLS_NODE.format(
                 user_id=userInfo.get("user_id", "Desconocido"),
                 name=userInfo.get("name", "Desconocido"),
@@ -328,15 +329,15 @@ class WhatsAppMessageHandler:
         else:
             logging.warning(f"User {user_id} not found in chat history")
 
-    def get_chat_history(self, user_id: str):
-        return self.chat_history.get(user_id, [])
+    # def get_chat_history(self, user_id: str):
+    #     return self.chat_history.get(user_id, [])
     
-    def clear_chat_history(self, user_id: str):
-        if user_id in self.chat_history: 
-            self.chat_history[user_id] = []
-            self.chat_ids[user_id] = None
-        else:
-            logging.warning(f"User {user_id} not found in chat history")
+    # def clear_chat_history(self, user_id: str):
+    #     if user_id in self.chat_history: 
+    #         self.chat_history[user_id] = []
+    #         self.chat_ids[user_id] = None
+    #     else:
+    #         logging.warning(f"User {user_id} not found in chat history")
 
     def convert_chat_history_to_messages(
         self, chat_history: list[Dict[str, str]]
