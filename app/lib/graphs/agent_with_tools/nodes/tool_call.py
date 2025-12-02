@@ -8,6 +8,7 @@ import uuid
 import logging
 from app.lib.graphs.agent_with_tools.state import ChatState
 from app.models.record2 import RecordBase
+from pydantic import BaseModel
 class CustomToolNode:
     """
     A Node that:
@@ -25,80 +26,74 @@ class CustomToolNode:
         self.tools_by_name = {tool.name: tool for tool in tools}
 
     async def __call__(self, state: ChatState):
-        # 1) Grab the last formatted message (a dict)
         logging.info("CALLING TOOLS")
         last_entry = state.messages[-1]
-        sender = last_entry.get("role", "")
-        text = last_entry.get("content", "")
-        incoming_tool_id = last_entry.get("tool_call_id", str(uuid.uuid4()))
+        tool_calls = last_entry.get("tool_calls", [])
 
+        if not tool_calls:
+            return state
 
-        # 2) Only proceed if this was an Assistant→tool-call line
-        #    We expect exactly: "Calling FooTool with arguments {...}"
-        if sender == "assistant" and text.startswith("Calling ") and " with arguments " in text:
-            # 3) Extract the tool name and the JSON args via regex
-            #    Regex breakdown:
-            #      ^Calling (\w+)   → captures the tool name (letters/numbers/underscore)
-            #       with arguments (.*)$ → captures everything after " with arguments "
-            m = re.match(r"^Calling (\w+) with arguments (.*)$", text)
-            if not m:
-                # If it doesn't match exactly, we do nothing
-                return state
+        # Si sólo quieres ejecutar el primer tool_call:
+        tc = tool_calls[0]
+        func = tc["function"]
+        tool_name = func["name"]
+        args_json = func["arguments"]
+        incoming_tool_id = tc["id"]
 
-            tool_name = m.group(1)
-            args_json = m.group(2).strip()
-
-            # 4) Load the JSON arguments into a Python dict
-            try:
-                args = json.loads(args_json)
-            except json.JSONDecodeError:
-                # If malformed JSON, append an error message and return
-                state.messages.append({
-                    "role": "assistant",
-                    "content": f"Could not parse arguments: {args_json}",
-                'tool_call_id' : incoming_tool_id
-                })
-                return state
-
-            # 5) Look up the correct tool
-            tool = self.tools_by_name.get(tool_name)
-            if tool is None:
-                state.messages.append({
-                    "role": "assistant",
-                    "content": f"No tool named '{tool_name}' registered.",
-                'tool_call_id' : incoming_tool_id
-                })
-                return state
-
-            # 6) Invoke the tool. Many tools have signature invoke(**kwargs), adjust if yours differ:
-            try:
-                observation = await tool.ainvoke(input=args,id=incoming_tool_id)
-            except Exception as e:
-                logging.info(f"Error Procesing tool. Error code: {e}")
-                print(e)
-                # If the tool itself raises, capture that
-                state.messages.append({
-                    "role": f"assistant",
-                    "content": f" {tool_name} " +f"Error during invocation: {str(e)}",
-                'tool_call_id' : incoming_tool_id
-                })
-                return state
-
-            # 7) Append the tool's response in the same two‐field format
+        try:
+            args = json.loads(args_json)
+        except json.JSONDecodeError:
             state.messages.append({
-                "role": f"assistant",
-                "content": f" {tool_name} " + observation if isinstance(observation, str) else str(observation),
-                'tool_call_id' : incoming_tool_id
+                "role": "assistant",
+                "content": f"Could not parse arguments: {args_json}",
             })
-            if tool_name == "SaveRecord":
-                state.record_added = True
-            if tool_name == "CreateRecord":
+            return state
+
+        tool = self.tools_by_name.get(tool_name)
+        if tool is None:
+            state.messages.append({
+                "role": "assistant",
+                "content": f"No tool named '{tool_name}' registered.",
+            })
+            return state
+
+        try:
+            observation = await tool.ainvoke(args)
+        except Exception as e:
+            logging.info(f"Error Procesing tool. Error code: {e}")
+            state.messages.append({
+                "role": "assistant",
+                "content": f"{tool_name} Error during invocation: {str(e)}",
+            })
+            return state
+
+        #  4) Normalizar observation → string para meter en messages
+        if isinstance(observation, BaseModel):
+            obs_for_llm = observation.model_dump_json()
+        elif isinstance(observation, dict):
+            obs_for_llm = json.dumps(observation)
+        else:
+            obs_for_llm = str(observation)
+        # Aquí está el cambio importante:
+        # Añadimos un mensaje de rol "tool", no "assistant"
+        state.messages.append({
+            "role": "tool",
+            "tool_call_id": incoming_tool_id,
+            "name": tool_name,
+            "content": obs_for_llm,
+        })
+
+        if tool_name == "SaveRecord":
+            state.record_added = True
+        if tool_name == "CreateRecord":
+            # Aquí quieres guardar el RecordBase en el estado
+            if isinstance(observation, RecordBase):
                 state.record = observation
-                state.messages.append({
-                    "role": f"assistant",
-                    "content": f"Datos recolectados correctamente",
-                    'tool_call_id' : incoming_tool_id
-                })
-        # If last message wasn’t a “Calling …” line, we do nothing (so no tool is run).
+            elif isinstance(observation, dict):
+                state.record = RecordBase(**observation)
+            else:
+                # En caso raro, lo dejamos como está para no petar
+                logging.info(f"Unexpected type for CreateRecord observation: {type(observation)}")
+
         return state
     

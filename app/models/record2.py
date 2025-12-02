@@ -36,20 +36,40 @@ class RecordBase(BaseModel):
             }
         }
 
+class MetadataOsigris():
 
+    type: str = Field(default="Create")
+    date: datetime = Field(default_factory=datetime.utcnow, title="Fecha de Creación", description="Marca de tiempo exacta (fecha y hora UTC) de cuándo se creó el registro en el sistema. Formato: AAAA-MM-DDTHH:MM:SSZ. Ejemplo: '2024-07-15T10:30:00Z'.")
+    idorigin: int = Field(default=6)
+    user: dict # resultado de hacer peticion GET al servicio osigrisapi/oauth/user/show con token. Revisar si nos sirve este objeto (devuelve User en vez de UserMetadata). Si no, crear objeto básico con type+id (obtenidos de api)
 
-class RecordPrivateOsigris(RecordBase):
+class InfoPhytosanitaryOsigris():
+
+    type: str = Field(default="InfoPhytosanitary")
+    id: int = Field(default=-1)
+    subtype: dict # resultado de cuando busque "metenal" en osigris. Sería un diccionario? array de campos, json, .. Si no, crear objeto básico con type+id (obtenidos de api)
+    inidate: datetime # podemos poner de hora las 09.00 de la mañana. Sería el campo "Fecha" del RecordBarse + la hora (RecordBase es date, no datetime)
+    enddate: datetime # podemos poner de hora las 09.00 de la noche. Sería el campo "Fecha" del RecordBarse + la hora (RecordBase es date, no datetime)
+    d: float # es la dosis del objeto RecordBase.
+    md: dict # resultado de cuando busque el campo medida_dosis del objeto RecordBase en osigris. Sería un diccionario? array de campos, json, .. Si no, crear objeto básico con type+id (obtenidos de api)
+    infection: dict # resultado de cuando busque el campo plaga del objeto RecordBase en osigris. Sería un diccionario? array de campos, json, .. Si no, crear objeto básico con type+id (obtenidos de api)
+    metadata: list[MetadataOsigris]
+
+class InfoPhytosanitaryParcelOsigris():
     """
     Clasifica y almacena los detalles de un registro de aplicación o labor agrícola.
     Esta clase está diseñada para ser interpretada por un LLM para la extracción de información
     y el registro estructurado de datos de campo.
     """
-    Sigpacs: Optional[List[int]] = Field(None, title="Parcelas/Identificadores de Campo", description="Lista de IDs SIGPAC como enteros.")    
+    type: str = Field(default="InfoPhytosanitaryParcel")
+    info: InfoPhytosanitaryOsigris
+    surface: float # aqui siempre tengo que mandar. si el usuario indica en RecordBase, poner ese campo, si no recoger el campo devuelto en el endpoint cuando filtro el cultivo en la campaña.
+    idcp: List[int] = Field(None, title="Parcelas/Identificadores de Campo", description="Lista de IDs SIGPAC como enteros.")    
     
     class Config:
         populate_by_name = True
         json_schema_extra = {
             "example": {
-                "Sigpacs": "Invernadero Norte (Ref: INV-N-CS), Parcela Auxiliar (Ref: AUX-CS-01)"
+                "idcp": "Invernadero Norte (Ref: INV-N-CS), Parcela Auxiliar (Ref: AUX-CS-01)"
             }
         }

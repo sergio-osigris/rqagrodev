@@ -23,11 +23,10 @@ class ChatGraph:
         agent_actions = actions.ChatAgentActions(llm=self.llm, tools=self.tools)
 
         def should_continue(state: ChatState):
-            messages = state.messages
-            last_message = messages[-1]
-            text = last_message.get("content", "")
-            print("SHOULD "+text)
-            if text.startswith("Calling ") and " with arguments " in text:
+            last_message = state.messages[-1]
+            tool_calls = last_message.get("tool_calls", [])
+            print("SHOULD, tool_calls:", tool_calls)
+            if tool_calls:
                 return "continue"
             return END
 
