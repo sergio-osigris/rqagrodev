@@ -38,7 +38,7 @@ class RecordBase(BaseModel):
 
 
 
-class RecordRPrivateOsigris(RecordBase):
+class RecordPrivateOsigris(RecordBase):
     """
     Clasifica y almacena los detalles de un registro de aplicación o labor agrícola.
     Esta clase está diseñada para ser interpretada por un LLM para la extracción de información

@@ -58,17 +58,18 @@ if __name__ == "__main__":
         from app.prompts import AGENT_WITH_TOOLS_NODE
         from app.utils.pydantic_formatters import generar_listado_campos
         from app.models.record import RecordRequest
+        from app.models.record2 import RecordBase
         import sys
         _: bool = load_dotenv(find_dotenv())    
 
         llm = ChatOpenAI(model_name="gpt-4o-2024-11-20")
-        tools = [validar_cultivo, validar_explotacion, check_fitosanitarios,save_record,create_record,get_current_date,available_fitosanitarios]
+        tools = [save_record,create_record,get_current_date]
         
         chat_graph = ChatGraph(llm=llm, tools=tools)
         workflow = chat_graph.graph()
         user_id = str(uuid.uuid4())
         messages = [
-            {"role": "system", "content": AGENT_WITH_TOOLS_NODE.format(user_id=user_id,name="Daniel García",size=500,listado_campos=generar_listado_campos(RecordRequest),current_date=datetime.datetime.now().strftime("%Y-%m-%d"))},
+            {"role": "system", "content": AGENT_WITH_TOOLS_NODE.format(user_id=user_id,name="Daniel García",size=500,listado_campos=generar_listado_campos(RecordBase),current_date=datetime.datetime.now().strftime("%Y-%m-%d"))},
         ]
         while True:
             user_input = input("You: ")
