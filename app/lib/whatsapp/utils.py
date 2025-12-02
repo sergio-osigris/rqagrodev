@@ -67,15 +67,28 @@ class WhatsAppWebhook:
             )
 
         # Check if it's a WhatsApp status update
-        if (
-            body.get("entry", [{}])[0]
-            .get("changes", [{}])[0]
-            .get("value", {})
-            .get("statuses")
-        ):
-            logging.info("Received a WhatsApp status update.")
-            return JSONResponse(content={"status": "ok"}, status_code=200)
+        # if (
+        #     body.get("entry", [{}])[0]
+        #     .get("changes", [{}])[0]
+        #     .get("value", {})
+        #     .get("statuses")
+        # ):
+        #     logging.info("Received a WhatsApp status update.")
+        #     return JSONResponse(content={"status": "ok"}, status_code=200)
 
+        if body.get("entry"):
+            for entry in body.get("entry", []):
+                for change in entry.get("changes", []):
+                    value = change.get("value", {})
+                    statuses = value.get("statuses", [])
+
+                    if not statuses:
+                        continue
+
+                    for status in statuses:
+                        message_id = status.get("id")
+                        status_value = status.get("status")
+                        logging.info(f"WhatsApp status update: id={message_id}, status={status_value}")
         try:
             if self.is_valid_whatsapp_message(body):
                 await self.message_handler.process_message(body)
