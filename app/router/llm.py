@@ -7,7 +7,7 @@ from app.interfaces.llm import ChatLLM
 import os        
 from app.lib.graphs.agent_with_tools.tools.fitosanitarios import check_fitosanitarios,available_fitosanitarios
 from app.lib.graphs.agent_with_tools.tools.osigris import validar_explotacion, validar_cultivo
-from app.lib.graphs.agent_with_tools.tools.record import save_record,create_record
+from app.lib.graphs.agent_with_tools.tools.record import create_record
 from app.lib.graphs.agent_with_tools.tools.utils import get_current_date
 from app.utils.pydantic_formatters import generar_listado_campos
 from app.models.record2 import RecordBase
