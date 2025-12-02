@@ -87,7 +87,9 @@ class WhatsAppMessageHandler:
         # Si el registro se ha guardado definitivamente, limpiar estado de la conversación
         if response.get("record_added", False) is True:
             logging.info("Detected new record added. Deleting chat history")
+            print(state)
             self.clear_state(phone_number)
+            print(state)
 
         return output_text
 
