@@ -26,7 +26,7 @@ class ChatGraph:
             last_message = state.messages[-1]
             tool_calls = last_message.get("tool_calls", [])
             print("SHOULD, tool_calls:")
-            # print(tool_calls)
+            print(tool_calls)
             if tool_calls:
                 return "continue"
             return END
