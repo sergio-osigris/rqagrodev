@@ -89,6 +89,7 @@ class WhatsAppMessageHandler:
             logging.info("Detected new record added. Deleting chat history")
             print(state)
             self.clear_state(phone_number)
+            print("AHORA LIMPIO EL STATE")
             print(state)
 
         return output_text
