@@ -13,5 +13,5 @@ async def verify_webhook(request: Request):
 
 @router.post("")
 async def handle_webhook(request: Request):
-    logging.info(request)
+    # logging.info(request)
     return await whatsapp_webhook.handle_message(request)
