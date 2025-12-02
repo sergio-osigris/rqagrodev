@@ -28,7 +28,7 @@ class ChatAgentActions:
         state.messages.append(msg_dict)
         
         print("ACTIONS: ")
-        print(state)
+        # print(state)
         return state
     
     
