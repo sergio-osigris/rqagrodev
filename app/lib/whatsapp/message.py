@@ -9,7 +9,9 @@ from typing import Dict
 from app.prompts import AGENT_WITH_TOOLS_NODE
 from app.utils.pydantic_formatters import generar_listado_campos
 from app.models.record import RecordRequest
+from app.models.record2 import RecordBase
 import datetime
+from datetime import date
 # Define tokens and IDs from environment variables
 VERIFY_TOKEN = os.getenv("VERIFY_TOKEN")
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
@@ -316,10 +318,9 @@ class WhatsAppMessageHandler:
         state = self.chat_history.get(user_id, ChatState(messages=[({"role":"system", "content":AGENT_WITH_TOOLS_NODE.format(
                 user_id=userInfo.get("user_id", "Desconocido"),
                 name=userInfo.get("name", "Desconocido"),
-                size=userInfo.get("Hectáreas", "Desconocido"),
-                listado_campos=generar_listado_campos(RecordRequest),current_date=datetime.datetime.now().strftime("%Y-%m-%d")
+                listado_campos=generar_listado_campos(RecordBase),current_date=datetime.datetime.now().strftime("%Y-%m-%d")
                     ),"tool_call_id":"",
-                })], user_id=user_id,  name=userInfo.get("name", "Desconocido")))
+                })], user_id=user_id, name=userInfo.get("name", "Desconocido"), record=RecordBase(Fecha=date.today(), Tratamiento_fitosanitario="",Campaña="",Año_Campaña="",Plaga="",Dosis=0, Medida_dosis="", Cultivo="", Superficie=0 )))
         return state
     
     def clear_state(self,user_id:str):
