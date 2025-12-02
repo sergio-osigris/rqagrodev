@@ -59,7 +59,7 @@ class WhatsAppMessageHandler:
         return userInfo[0]
 
     async def generate_response(
-        self, userInfo: dict, chat_history: list[Dict[str,str]], phone_number:str
+        self, userInfo: dict, message: str, phone_number:str
     ) -> str:
         
         logging.debug(f"Current user info: {userInfo}")
@@ -68,7 +68,8 @@ class WhatsAppMessageHandler:
         #     user_id=str(userInfo.get("user_id", "unknown_user")),
         #     name=str(userInfo.get("name", "Desconocido")),
         # )
-        state = self.get_prev_state(phone_number)
+        state = self.get_prev_state(phone_number, userInfo)
+        state.messages.append({"role": "user", "content": message})
         logging.debug(f"Current state: {state}")
         response = await agent_with_tools_graph.ainvoke(state)
         self.update_state(phone_number, response)
@@ -214,13 +215,13 @@ class WhatsAppMessageHandler:
         # Add the incoming user message to chat history
         userInfo = await self._getUserInfo(wa_id)
 
-        self.add_to_history(wa_id, user_message, "user",userInfo=userInfo)
+        # self.add_to_history(wa_id, user_message, "user",userInfo=userInfo)
         # self.update_state(wa_id, response?)
-        current_history = self.get_chat_history(wa_id)
+        # current_history = self.get_chat_history(wa_id)
 
         # Process the message to generate bot response
         if msg_type == "text" or msg_type == "interactive":
-            response_text = await self.generate_response(userInfo, current_history,wa_id)
+            response_text = await self.generate_response(userInfo, user_message,wa_id)
         elif msg_type == "image":
             if media_id:
                 response_text = f"Received image: {file_url}"
@@ -310,9 +311,22 @@ class WhatsAppMessageHandler:
     def update_state(self,user_id:str,state:ChatState):
         self.chat_history[user_id] = state.messages
 
-    def get_prev_state(self,user_id:str):
-        state = self.chat_history.get(user_id, ChatState(messages=[], user_id=user_id, name="Desconocido"))
+    def get_prev_state(self,user_id:str,userInfo:Dict = None):
+        state = self.chat_history.get(user_id, ChatState(messages=[({"role":"system", "content":AGENT_WITH_TOOLS_NODE.format(
+                user_id=userInfo.get("user_id", "Desconocido"),
+                name=userInfo.get("name", "Desconocido"),
+                size=userInfo.get("Hectáreas", "Desconocido"),
+                listado_campos=generar_listado_campos(RecordRequest),current_date=datetime.datetime.now().strftime("%Y-%m-%d")
+                    ),"tool_call_id":"",
+                })], user_id=user_id,  name=userInfo.get("name", "Desconocido")))
         return state
+    
+    def clear_state(self,user_id:str):
+        if user_id in self.chat_history: 
+            self.chat_history[user_id] = None
+            self.chat_ids[user_id] = None
+        else:
+            logging.warning(f"User {user_id} not found in chat history")
 
     def get_chat_history(self, user_id: str):
         return self.chat_history.get(user_id, [])
