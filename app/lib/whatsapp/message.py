@@ -83,6 +83,8 @@ class WhatsAppMessageHandler:
         # 5. Último mensaje del asistente (el que mandas por WhatsApp al usuario)
         output_text = response["messages"][-1]["content"]
         logging.info(f"Assistant response: {output_text}")
+        logging.info(f"PRUEBA PRA VER EL STATE")
+        logging.info(response)
 
         # 6. Leer resultados de las comprobaciones, si existen
         check_messages = response.get("check_messages") or []
