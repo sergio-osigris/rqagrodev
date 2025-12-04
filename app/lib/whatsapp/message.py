@@ -99,25 +99,15 @@ class WhatsAppMessageHandler:
         # campaign_need_fix = response.get("campaign_need_fix", False)
         # campaign_validated = response.get("campaign_validated", None)
 
-        # 👉 AQUÍ metes la lógica que quieras ligada a WhatsApp 
-
-        # 2) Mandas el mensaje de la campaña (será UNO de estos tres casos):
+        # Monto un único mensaje para devolver por whatsapp con el valor de todas las comprobaciones
         if check_messages:
-            for msg in check_messages:
-                await self.send_whatsapp_message(phone_number, msg)
+            output_text = "\n".join(str(msg) for msg in check_messages)
 
         # 7. Si el registro se ha guardado definitivamente, limpiar estado de la conversación
         if response.get("record_generated", False) is True:
             logging.info("Detected new record generated. Deleting chat history")
-            print(self.chat_history.get(phone_number))
-
             self.clear_state(phone_number)
 
-            print("AHORA LIMPIO EL HISTORY")
-            print(self.chat_history.get(phone_number))
-
-        # OJO: devolvemos el texto del asistente tal cual,
-        # para respetar el "Proceso comprobado correctamente por Osigris."
         return output_text
 
 
