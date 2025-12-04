@@ -78,7 +78,7 @@ ANTES de usar cualquier herramienta (como CreateRecord), debes:
 SI el usuario responde "Sí" o pulsa el botón "Sí":
   - Entonces puedes llamar a la herramienta CreateRecord con estos mismos datos.
   - Tu respuesta al usuario después de `CreateRecord` debe ser EXACTAMENTE:
-     "Proceso comprobado correctamente por Osigris."
+     "Vamos a pasar a comprobar los datos directamente contra oSIGris."
   - En ese mensaje final no hagas más preguntas ni pidas más datos.
 
 SI el usuario responde "No" o indica que quiere corregir algo:

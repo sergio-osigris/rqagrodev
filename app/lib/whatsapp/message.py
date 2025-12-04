@@ -85,23 +85,18 @@ class WhatsAppMessageHandler:
         logging.info(f"Assistant response: {output_text}")
 
         # 6. Leer resultados de las comprobaciones, si existen
-        check_status = response.get("check_status")             # "ok" / "failed" / None
-        check_messages = response.get("check_messages", [])     # lista de strings
+        check_messages = response.get("check_messages") or []
+        campaign_need_choice = response.get("campaign_need_choice", False)
+        campaign_need_fix = response.get("campaign_need_fix", False)
+        campaign_validated = response.get("campaign_validated", None)
 
-        logging.info(f"Check status: {check_status}")
-        logging.info(f"Check messages: {check_messages}")
+        # 👉 AQUÍ metes la lógica que quieras ligada a WhatsApp 
+        # 1) Mandas el mensaje "oficial" del agente
+        await self.send_whatsapp_message(phone_number, output_text)
 
-        # 👉 AQUÍ metes la lógica que quieras ligada a WhatsApp
-
-        # Ejemplo A: sólo registrar/loggear (sin mandar nada al usuario)
-        if check_status is not None:
-            resumen_checks = f"Estado de comprobaciones: {check_status.upper()}"
-            if check_messages:
-                resumen_checks += "\n" + "\n".join(f"- {m}" for m in check_messages)
-            logging.info(f"Resumen comprobaciones:\n{resumen_checks}")
-
-            # Ejemplo B (opcional): mandar un mensaje a otro WhatsApp (por ejemplo, el técnico)
-            # await self.send_whatsapp_message(TECH_WHATSAPP_ID, resumen_checks)
+        # 2) Mandas el mensaje de la campaña (será UNO de estos tres casos):
+        for msg in check_messages:
+            await self.send_whatsapp_message(phone_number, msg)
 
         # 7. Si el registro se ha guardado definitivamente, limpiar estado de la conversación
         if response.get("record_generated", False) is True:

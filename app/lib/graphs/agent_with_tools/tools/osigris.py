@@ -58,23 +58,79 @@ def hacer_peticion_get(url) -> str:
 
 # @tool("ComprobarExplotacion")    
 def validar_explotacion(state: ChatState) -> None:
-    """Usa esta función para comprobar si existe la campaña en osigris, pasándole el año y el alias de la campaña
-    Arguments:
-    - año: Año de la campaña introducido por el usuario
-    - campaña: Alias/nombre de la campaña introducido por el usuario
     """
-    logging.info(f"--Start ComprobarExplotacion tool with arguments: {state.record.Año_campaña}, {state.record.Campaña}")
-    url = f"{API_URL}/osigrisapi/resource/season/list?&qg1[and]=year,alias&year[eq]={state.record.Año_campaña}&alias[eq]={state.record.Campaña}"
+    Comprueba campaña en Osigris usando Año_campaña y Campaña del record.
+    Rellena campos en el state y añade mensajes a check_messages.
+    """
+    año = state.record.Año_campaña
+    nombre = state.record.Campaña
+
+    logging.info(f"--Start ComprobarExplotacion tool with arguments: {año}, {nombre}")
+
+    url = (
+        f"{API_URL}/osigrisapi/resource/season/list"
+        f"?&qg1[and]=year,alias&year[eq]={año}&alias[eq]={nombre}"
+    )
     valido, datos = hacer_peticion_get(url)
-    if valido=="si":
+
+    # Inicializamos algunos flags
+    state.campaign_validated = False
+    state.campaign_need_choice = False
+    state.campaign_need_fix = False
+    state.campaign_id = None
+    state.campaign_options = None
+
+    if valido == "si":
         if len(datos) == 1:
-            id_campaña=datos[0]["info"]["id"]
-            return f"Campaña comprobada. ID de Campaña: {id_campaña}"
-        else:
-            id_campaña = [obj["info"]["id"] for obj in datos]
-            return f"Existen varias campañas con el {state.record.Año_campaña} y {state.record.Campaña} indicados. IDs de las campañas: {id_campaña}"   
+            # ---------- CASO 1: UNA SOLA CAMPAÑA ----------
+            id_campaña = datos[0]["info"]["id"]
+
+            state.campaign_validated = True
+            state.campaign_id = id_campaña
+
+            msg = f"Campaña comprobada. ID de Campaña: {id_campaña}"
+            state.check_messages.append(msg)
+
+        elif len(datos) > 1:
+            # ---------- CASO 2: VARIAS CAMPAÑAS ----------
+            options = []
+            for obj in datos:
+                info = obj["info"]
+                options.append(
+                    {
+                        "id": info["id"],
+                        "alias": info.get("alias"),
+                        "year": info.get("year"),
+                    }
+                )
+
+            state.campaign_validated = False
+            state.campaign_need_choice = True
+            state.campaign_options = options
+
+            # Mensaje amigable para WhatsApp
+            # Ejemplo: numeramos las opciones
+            lines = ["He encontrado varias campañas con esos datos:"]
+            for idx, opt in enumerate(options, start=1):
+                lines.append(
+                    f"{idx}) ID: {opt['id']} | Año: {opt['year']} | Nombre: {opt['alias']}"
+                )
+            lines.append("Responde con el número de la campaña correcta (1, 2, 3...).")
+
+            msg = "\n".join(lines)
+            state.check_messages.append(msg)
+
     else:
-        return f"No encuentro ninguna campaña del {state.record.Año_campaña} con el nombre {state.record.Campaña}"
+        # ---------- CASO 3: NINGUNA CAMPAÑA ----------
+        state.campaign_need_fix = True
+        state.campaign_validated = False
+
+        msg = (
+            f"No encuentro ninguna campaña del {año} con el nombre {nombre}. "
+            "Por favor, revisa el año y el nombre de la campaña e indícamelo de nuevo."
+        )
+        state.check_messages.append(msg)
+
 
 # @tool("ComprobarCultivo")    
 def validar_cultivo(state: ChatState) -> None:

@@ -18,5 +18,12 @@ class ChatState(BaseModel):
     check_messages: list[str] = Field(default_factory=list)
     # osigris_token:
 
+    # para campaña
+    campaign_validated: bool | None
+    campaign_id: str | None
+    campaign_options: list[dict] | None  # para el caso de varias
+    campaign_need_choice: bool | None
+    campaign_need_fix: bool | None
+
     class Config:
         arbitrary_types_allowed = True
