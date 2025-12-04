@@ -100,8 +100,6 @@ class WhatsAppMessageHandler:
         # campaign_validated = response.get("campaign_validated", None)
 
         # 👉 AQUÍ metes la lógica que quieras ligada a WhatsApp 
-        # 1) Mandas el mensaje "oficial" del agente
-        await self.send_whatsapp_message(phone_number, output_text)
 
         # 2) Mandas el mensaje de la campaña (será UNO de estos tres casos):
         if check_messages:
