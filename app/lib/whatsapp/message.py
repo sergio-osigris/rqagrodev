@@ -95,17 +95,18 @@ class WhatsAppMessageHandler:
 
         # 6. Leer resultados de las comprobaciones, si existen
         check_messages = response.get("check_messages") or []
-        campaign_need_choice = response.get("campaign_need_choice", False)
-        campaign_need_fix = response.get("campaign_need_fix", False)
-        campaign_validated = response.get("campaign_validated", None)
+        # campaign_need_choice = response.get("campaign_need_choice", False)
+        # campaign_need_fix = response.get("campaign_need_fix", False)
+        # campaign_validated = response.get("campaign_validated", None)
 
         # 👉 AQUÍ metes la lógica que quieras ligada a WhatsApp 
         # 1) Mandas el mensaje "oficial" del agente
         await self.send_whatsapp_message(phone_number, output_text)
 
         # 2) Mandas el mensaje de la campaña (será UNO de estos tres casos):
-        for msg in check_messages:
-            await self.send_whatsapp_message(phone_number, msg)
+        if check_messages:
+            for msg in check_messages:
+                await self.send_whatsapp_message(phone_number, msg)
 
         # 7. Si el registro se ha guardado definitivamente, limpiar estado de la conversación
         if response.get("record_generated", False) is True:
