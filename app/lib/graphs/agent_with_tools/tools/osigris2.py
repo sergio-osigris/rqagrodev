@@ -5,12 +5,10 @@ from .osigris import ALL_CHECKS
 def check_record_node(state: ChatState) -> ChatState:
     logging.info("Ejecutando comprobaciones de registro...")
 
-    if not hasattr(state, "check_messages") or state.check_messages is None:
-        state.check_messages = []
-
-    if not hasattr(state, "check_errors") or state.check_errors is None:
-        state.check_errors = []
-
+    # reseteamos por si venían de ciclos anteriores
+    state.check_messages = []
+    state.check_errors = []
+    
     for check in ALL_CHECKS:
         try:
             check(state)   # ya no esperamos return, sólo efectos en state
