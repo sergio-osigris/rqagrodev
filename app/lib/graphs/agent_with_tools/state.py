@@ -11,8 +11,11 @@ class ChatState(BaseModel):
     messages: List[Dict[str, Any]] = []
     user_id: str = Field(description="User id from names table")
     name: str = Field(description="Full name of user")
-    record_added: bool = Field(description="Indicates if the current conversation has already been saved to a new record.",default=False)
+    record_generated: bool = Field(description="Indicates if the current conversation has already been generated a new record.",default=False)
     record: RecordBase = Field(description="")
+    check_errors: list[str] = []
+    check_status: str | None = None
+    check_messages: list[str] = Field(default_factory=list)
     # osigris_token:
 
     class Config:

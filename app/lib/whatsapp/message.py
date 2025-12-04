@@ -66,35 +66,57 @@ class WhatsAppMessageHandler:
         
         logging.debug(f"Current user info: {userInfo}")
 
-        # Recuperar estado previo como dict
+        # 1. Recuperar estado previo
         state = self.get_prev_state(phone_number, userInfo)
 
-        # Añadir mensaje de usuario
+        # 2. Añadir mensaje de usuario
         state["messages"].append({"role": "user", "content": message})
 
         logging.debug(f"Current state: {state}")
 
-        # Ejecutar el grafo
+        # 3. Ejecutar el grafo (agent + tools + check_record)
         response = await agent_with_tools_graph.ainvoke(state)
 
-        # Guardar nuevo estado
+        # 4. Guardar nuevo estado en memoria propia
         self.update_state(phone_number, response)
 
-        # Sacar el último mensaje del asistente SIN meternos con .messages
+        # 5. Último mensaje del asistente (el que mandas por WhatsApp al usuario)
         output_text = response["messages"][-1]["content"]
         logging.info(f"Assistant response: {output_text}")
 
-        # Si el registro se ha guardado definitivamente, limpiar estado de la conversación
-        if response.get("record_added", False) is True:
-            logging.info("Detected new record added. Deleting chat history")
+        # 6. Leer resultados de las comprobaciones, si existen
+        check_status = response.get("check_status")             # "ok" / "failed" / None
+        check_messages = response.get("check_messages", [])     # lista de strings
+
+        logging.info(f"Check status: {check_status}")
+        logging.info(f"Check messages: {check_messages}")
+
+        # 👉 AQUÍ metes la lógica que quieras ligada a WhatsApp
+
+        # Ejemplo A: sólo registrar/loggear (sin mandar nada al usuario)
+        if check_status is not None:
+            resumen_checks = f"Estado de comprobaciones: {check_status.upper()}"
+            if check_messages:
+                resumen_checks += "\n" + "\n".join(f"- {m}" for m in check_messages)
+            logging.info(f"Resumen comprobaciones:\n{resumen_checks}")
+
+            # Ejemplo B (opcional): mandar un mensaje a otro WhatsApp (por ejemplo, el técnico)
+            # await self.send_whatsapp_message(TECH_WHATSAPP_ID, resumen_checks)
+
+        # 7. Si el registro se ha guardado definitivamente, limpiar estado de la conversación
+        if response.get("record_generated", False) is True:
+            logging.info("Detected new record generated. Deleting chat history")
             print(self.chat_history.get(phone_number))
 
             self.clear_state(phone_number)
+
             print("AHORA LIMPIO EL HISTORY")
             print(self.chat_history.get(phone_number))
 
-
+        # OJO: devolvemos el texto del asistente tal cual,
+        # para respetar el "Proceso comprobado correctamente por Osigris."
         return output_text
+
 
     
     def build_button_payload(self,recipient:str, text:str, button_titles:dict):
@@ -362,7 +384,7 @@ class WhatsAppMessageHandler:
                 Cultivo="",
                 Superficie=0,
             ),
-            "record_added": False,
+            "record_generated": False,
         }
 
     

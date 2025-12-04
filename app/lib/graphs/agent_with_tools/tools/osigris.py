@@ -2,8 +2,12 @@ from langchain_core.tools import tool
 from app.interfaces.airtable import PostgresClient
 import logging
 import requests
+from typing import Protocol, Callable
+from app.lib.graphs.agent_with_tools.state import ChatState
 
 API_URL = "https://qnur3yjwqg.execute-api.eu-west-3.amazonaws.com"  
+# chat_graph.py (por ejemplo)
+import logging
 
 def obtener_access_token() -> str:
     url = "https://qnur3yjwqg.execute-api.eu-west-3.amazonaws.com/osigrisapi/oauth2/authentication/"
@@ -52,15 +56,15 @@ def hacer_peticion_get(url) -> str:
         logging.info(f"Error al conectar con el endpoint: {e}")
         return "no", None
 
-@tool("ComprobarExplotacion")    
-def validar_explotacion(campaña: str, año: str) -> str:
+# @tool("ComprobarExplotacion")    
+def validar_explotacion(state: ChatState) -> None:
     """Usa esta función para comprobar si existe la campaña en osigris, pasándole el año y el alias de la campaña
     Arguments:
     - año: Año de la campaña introducido por el usuario
     - campaña: Alias/nombre de la campaña introducido por el usuario
     """
-    logging.info(f"--Start ComprobarExplotacion tool with arguments: {año}, {campaña}")
-    url = f"{API_URL}/osigrisapi/resource/season/list?&qg1[and]=year,alias&year[eq]={año}&alias[eq]={campaña}"
+    logging.info(f"--Start ComprobarExplotacion tool with arguments: {state.record.Año_campaña}, {state.record.Campaña}")
+    url = f"{API_URL}/osigrisapi/resource/season/list?&qg1[and]=year,alias&year[eq]={state.record.Año_campaña}&alias[eq]={state.record.Campaña}"
     valido, datos = hacer_peticion_get(url)
     if valido=="si":
         if len(datos) == 1:
@@ -68,31 +72,36 @@ def validar_explotacion(campaña: str, año: str) -> str:
             return f"Campaña comprobada. ID de Campaña: {id_campaña}"
         else:
             id_campaña = [obj["info"]["id"] for obj in datos]
-            return f"Existen varias campañas con el {año} y {campaña} indicados. IDs de las campañas: {id_campaña}"   
+            return f"Existen varias campañas con el {state.record.Año_campaña} y {state.record.Campaña} indicados. IDs de las campañas: {id_campaña}"   
     else:
-        return f"No encuentro ninguna campaña del {año} con el nombre {campaña}"
+        return f"No encuentro ninguna campaña del {state.record.Año_campaña} con el nombre {state.record.Campaña}"
 
-@tool("ComprobarCultivo")    
-def validar_cultivo(cultivo: str, id_campaña: str, variedad: str) -> str:
-    """Usa esta función para comprobar si existe el cultivo en la campaña en osigris, pasándole el nombre del cultivo y el 
-    ID de la campaña
-    Arguments:
-    - cultivo: Cultivo introducido por el usuario
-    - id_campaña: Alias/nombre de la campaña obtenido en validar_explotacion
-    """
-    logging.info(f"--Start ComprobarCultivo tool with arguments: {cultivo}, {id_campaña}, {variedad}")
-    url = f"{API_URL}/osigrisapi/season/show/{id_campaña}/crop/list?qg1[and]=typecrop,typevariety&typecrop[in]={cultivo}&typevariety[in]={variedad}"
-    valido, datos = hacer_peticion_get(url)
-    if valido=="si":
-        if len(datos) == 1:
-            sigpacs_id=[item["id"] for item in datos[0]["sigpac"]]
-            return f"Cultivo comprobado correctamente en campaña. IDs de sigpacs obtenidos: {sigpacs_id}"
-        else:
-            nombres = []
-            for d in datos:
-                nombre = d["subtype"]["typecrop"]["name"]
-                variedad = d["subtype"]["name"]
-                nombres.append(f"{nombre}-{variedad}")
-            return f"Existen varios cultivos en la campaña indicada. Elige uno de estos cultivos-variedad: {nombres}"   
-    else:
-        return f"No encuentro ningún cultivo en la campaña indicada"
+# @tool("ComprobarCultivo")    
+# def validar_cultivo(state: ChatState) -> None:
+#     """Usa esta función para comprobar si existe el cultivo en la campaña en osigris, pasándole el nombre del cultivo y el 
+#     ID de la campaña
+#     Arguments:
+#     - cultivo: Cultivo introducido por el usuario
+#     - id_campaña: Alias/nombre de la campaña obtenido en validar_explotacion
+#     """
+#     logging.info(f"--Start ComprobarCultivo tool with arguments: {cultivo}, {id_campaña}, {variedad}")
+#     url = f"{API_URL}/osigrisapi/season/show/{id_campaña}/crop/list?qg1[and]=typecrop,typevariety&typecrop[in]={cultivo}&typevariety[in]={variedad}"
+#     valido, datos = hacer_peticion_get(url)
+#     if valido=="si":
+#         if len(datos) == 1:
+#             sigpacs_id=[item["id"] for item in datos[0]["sigpac"]]
+#             return f"Cultivo comprobado correctamente en campaña. IDs de sigpacs obtenidos: {sigpacs_id}"
+#         else:
+#             nombres = []
+#             for d in datos:
+#                 nombre = d["subtype"]["typecrop"]["name"]
+#                 variedad = d["subtype"]["name"]
+#                 nombres.append(f"{nombre}-{variedad}")
+#             return f"Existen varios cultivos en la campaña indicada. Elige uno de estos cultivos-variedad: {nombres}"   
+#     else:
+#         return f"No encuentro ningún cultivo en la campaña indicada"
+    
+ALL_CHECKS: list[Callable[[ChatState], str | None]] = [
+    validar_explotacion,
+    # validar_cultivo,
+]

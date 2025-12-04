@@ -5,6 +5,7 @@ from langgraph.graph import StateGraph, END, START
 
 from app.lib.graphs.agent_with_tools.nodes import actions
 from app.lib.graphs.agent_with_tools.state import ChatState
+from app.lib.graphs.agent_with_tools.tools.osigris2 import check_record_node
 from app.lib.graphs.agent_with_tools.nodes.tool_call import CustomToolNode
 class ChatGraph:
     def __init__(self,llm, tools: list[BaseTool]):
@@ -13,7 +14,7 @@ class ChatGraph:
         self.llm = llm
         if len(self.tools) > 0:
             self.llm = self.llm.bind_tools(self.tools)
-
+    
     def graph(self):
         """
         Builds the chat workflow graph.
@@ -23,24 +24,50 @@ class ChatGraph:
         agent_actions = actions.ChatAgentActions(llm=self.llm, tools=self.tools)
 
         def should_continue(state: ChatState):
+            """
+            Decide a dónde ir después de que el agente responda.
+            - Si hay tool_calls -> ir a 'action'
+            - Si el agente ha dicho "Proceso comprobado correctamente por Osigris."
+              o se ha marcado record_generated -> ir a 'check_record'
+            - Si nada de lo anterior -> END
+            """
             last_message = state.messages[-1]
             tool_calls = last_message.get("tool_calls", [])
             print("SHOULD, tool_calls:")
             print(tool_calls)
             if tool_calls:
                 return "continue"
+            # Si algún nodo de tools ha puesto record_generated=True
+            if getattr(state, "record_generated", False):
+                return "check_record"
             return END
 
+        # ---------- NODO AGENTE ----------
         workflow.add_node("agent", agent_actions.call_model)
+
+        # ---------- NODO HERRAMIENTAS ----------
         # workflow.add_node("action", ToolNode(tools=self.tools))
         workflow.add_node("action", CustomToolNode(self.tools))
 
+        # ---------- NODO CHECK RECORD ----------
+        workflow.add_node("check_record", check_record_node)
+
         workflow.set_entry_point("agent")
 
+        # ---------- EDGES CONDICIONALES DESDE agent ----------
         workflow.add_conditional_edges(
-            "agent", should_continue, {"continue": "action", END: END}
+            "agent",
+            should_continue,
+            {
+                "continue": "action",      # hay tool_calls -> vamos a tools
+                "check_record": "check_record",  # mensaje final / record_added -> comprobaciones
+                END: END,                 # nada más que hacer -> fin
+            },
         )
         workflow.add_edge("action", "agent")
+        # Después de las comprobaciones, terminamos
+        workflow.add_edge("check_record", END)
+
         return workflow.compile()
 
 
