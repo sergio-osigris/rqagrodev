@@ -75,7 +75,14 @@ class WhatsAppMessageHandler:
         logging.debug(f"Current state: {state}")
 
         # 3. Ejecutar el grafo (agent + tools + check_record)
-        response = await agent_with_tools_graph.ainvoke(state)
+        response_state = await agent_with_tools_graph.ainvoke(state)
+
+        # 3.1 Normalizar: convertir a dict sí o sí
+        if isinstance(response_state, ChatState):
+            response = response_state.model_dump()
+        else:
+            # Por si LangGraph ya te devuelve dict
+            response = dict(response_state)
 
         # 4. Guardar nuevo estado en memoria propia
         self.update_state(phone_number, response)
