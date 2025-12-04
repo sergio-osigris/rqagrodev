@@ -84,15 +84,15 @@ class CustomToolNode:
         })
 
         if tool_name == "SaveRecord":
-            state.record_added = True
+            state.record_generated = True
         if tool_name == "CreateRecord":
             # Aquí quieres guardar el RecordBase en el estado
             if isinstance(observation, RecordBase):
                 state.record = observation
-                state.record_added = True
+                state.record_generated = True
             elif isinstance(observation, dict):
                 state.record = RecordBase(**observation)
-                state.record_added = True
+                state.record_generated = True
             else:
                 # En caso raro, lo dejamos como está para no petar
                 logging.info(f"Unexpected type for CreateRecord observation: {type(observation)}")
