@@ -26,6 +26,15 @@ class ChatAgentActions:
             msg_dict["tool_calls"] = tool_calls
 
         state.messages.append(msg_dict)
+
+        state.campaign_validated = False
+        state.campaign_need_choice = False
+        state.campaign_need_fix = False
+        state.campaign_id = None
+        state.campaign_options = None
+        state.check_errors = []      
+        state.check_messages = []    
+        state.check_status = None 
         
         print("ACTIONS: ")
         # print(state)
