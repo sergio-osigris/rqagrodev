@@ -95,16 +95,19 @@ class WhatsAppMessageHandler:
 
         # 6. Leer resultados de las comprobaciones, si existen
         check_messages = response.get("check_messages") or []
-        # campaign_need_choice = response.get("campaign_need_choice", False)
-        # campaign_need_fix = response.get("campaign_need_fix", False)
-        # campaign_validated = response.get("campaign_validated", None)
+        campaign_need_choice = response.get("campaign_need_choice", False)
+        campaign_need_fix = response.get("campaign_need_fix", False)
+        campaign_validated = response.get("campaign_validated", None)
 
         # Monto un único mensaje para devolver por whatsapp con el valor de todas las comprobaciones
         if check_messages:
             output_text = "\n".join(str(msg) for msg in check_messages)
 
         # 7. Si el registro se ha guardado definitivamente, limpiar estado de la conversación
-        if response.get("record_generated", False) is True:
+        if (response.get("record_generated", False) is True
+            and campaign_validated
+            and not campaign_need_choice
+            and not campaign_need_fix):
             logging.info("Detected new record generated. Deleting chat history")
             self.clear_state(phone_number)
 
