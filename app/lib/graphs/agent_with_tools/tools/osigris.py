@@ -79,6 +79,9 @@ def validar_explotacion(state: ChatState) -> None:
     state.campaign_need_fix = False
     state.campaign_id = None
     state.campaign_options = None
+    state.check_errors = []      
+    state.check_messages = []    
+    state.check_status = None    
 
     if valido == "si":
         if len(datos) == 1:
@@ -128,7 +131,7 @@ def validar_explotacion(state: ChatState) -> None:
         state.campaign_validated = False
         # Reiniciar el valor de la variable, puesto que luego tendrá que generarse de nuevo el objeto válido (el registro creado anteriormente no sirve)
         state.record_generated = False
-        
+
         msg = (
             f"No encuentro ninguna campaña del {año} con el nombre {nombre}. "
             "Por favor, revisa el año y el nombre de la campaña e indícamelo de nuevo."
