@@ -1,6 +1,6 @@
 from app.lib.graphs.agent_with_tools.state import ChatState
 import logging
-from .osigris import ALL_CHECKS
+from .osigris import validar_explotacion, validar_cultivo
 
 def check_record_node(state: ChatState) -> ChatState:
     logging.info("Ejecutando comprobaciones de registro...")
@@ -9,13 +9,28 @@ def check_record_node(state: ChatState) -> ChatState:
     state.check_messages = []
     state.check_errors = []
     
-    for check in ALL_CHECKS:
+    # ---------- 1) VALIDAR CAMPAÑA ----------
+    if state.campaign_id is None:
         try:
-            check(state)   # ya no esperamos return, sólo efectos en state
+            validar_explotacion(state)
         except Exception as e:
-            logging.exception(f"Error ejecutando check {check.__name__}: {e}")
-            state.check_errors.append(f"Error interno en {check.__name__}")
+            logging.exception(f"Error ejecutando validar_explotacion: {e}")
+            state.check_errors.append("Error interno en validar_explotacion")
+            state.check_status = "failed"
+            # En un fallo interno, ya no seguimos con más checks
+            return state
 
+    # ---------- 2) VALIDAR CULTIVO ----------
+    if state.campaign_id:
+        try:
+            validar_cultivo(state)
+        except Exception as e:
+            logging.exception(f"Error ejecutando validar_cultivo: {e}")
+            state.check_errors.append("Error interno en validar_cultivo")
+            state.check_status = "failed"
+            # En un fallo interno, ya no seguimos con más checks
+            return state
+        
     if state.check_errors:
         state.check_status = "failed"
     else:

@@ -1,8 +1,5 @@
-from langchain_core.tools import tool
-from app.interfaces.airtable import PostgresClient
 import logging
 import requests
-from typing import Protocol, Callable
 from app.lib.graphs.agent_with_tools.state import ChatState
 
 API_URL = "https://qnur3yjwqg.execute-api.eu-west-3.amazonaws.com"  
@@ -55,8 +52,7 @@ def hacer_peticion_get(url) -> str:
     except requests.RequestException as e:
         logging.info(f"Error al conectar con el endpoint: {e}")
         return "no", None
-
-# @tool("ComprobarExplotacion")    
+ 
 def validar_explotacion(state: ChatState) -> None:
     """
     Comprueba campaña en Osigris usando Año_campaña y Campaña del state.
@@ -132,33 +128,31 @@ def validar_explotacion(state: ChatState) -> None:
         )
         state.check_messages.append(msg)
 
-
-# @tool("ComprobarCultivo")    
+   
 def validar_cultivo(state: ChatState) -> None:
-    """Usa esta función para comprobar si existe el cultivo en la campaña en osigris, pasándole el nombre del cultivo y el 
+    """Usa esta función para comprobar si existe el cultivo en la campaña en osigris, cogiendo del state el nombre del cultivo y el 
     ID de la campaña
-    Arguments:
-    - cultivo: Cultivo introducido por el usuario
-    - id_campaña: Alias/nombre de la campaña obtenido en validar_explotacion
+    Rellena campos en el state y añade mensajes a check_messages y errores a check_errors.
     """
-    logging.info(f"--Start ComprobarCultivo tool with arguments: cultivo, id_campaña, variedad")
-    url = f"{API_URL}/osigrisapi/season/show/id_campaña/crop/list?qg1[and]=typecrop,typevariety&typecrop[in]=cultivo&typevariety[in]=variedad"
+    cultivo=state.record.Cultivo
+    id_campaña=state.campaign_id
+    variedad=state.record.Variedad_Cultivo
+    logging.info(f"--Start ComprobarCultivo tool with arguments: {cultivo}, {id_campaña}, {variedad}")
+    url = f"{API_URL}/osigrisapi/season/show/{id_campaña}/crop/list?qg1[and]=typecrop,typevariety&typecrop[in]={cultivo}&typevariety[in]={variedad}"
     valido, datos = hacer_peticion_get(url)
     if valido=="si":
         if len(datos) == 1:
             sigpacs_id=[item["id"] for item in datos[0]["sigpac"]]
-            return f"Cultivo comprobado correctamente en campaña. IDs de sigpacs obtenidos: {sigpacs_id}"
+            msg = f"Cultivo comprobado correctamente en campaña. IDs de sigpacs obtenidos: {sigpacs_id}"
+            state.check_messages.append(msg)
         else:
             nombres = []
             for d in datos:
                 nombre = d["subtype"]["typecrop"]["name"]
                 variedad = d["subtype"]["name"]
                 nombres.append(f"{nombre}-{variedad}")
-            return f"Existen varios cultivos en la campaña indicada. Elige uno de estos cultivos-variedad: {nombres}"   
+            msg = f"Existen varios cultivos en la campaña indicada. Elige uno de estos cultivos-variedad: {nombres}" 
+            state.check_messages.append(msg)  
     else:
-        return f"No encuentro ningún cultivo en la campaña indicada"
-    
-ALL_CHECKS: list[Callable[[ChatState], str | None]] = [
-    validar_explotacion,
-    # validar_cultivo,
-]
+        msg = f"No encuentro ningún cultivo en la campaña indicada"
+        state.check_messages.append(msg) 
