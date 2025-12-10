@@ -12,6 +12,8 @@ from app.models.record import RecordRequest
 from app.models.record2 import RecordBase
 import datetime
 from datetime import date
+from app.lib.graphs.agent_with_tools.tools.osigris2 import check_record_node
+
 # Define tokens and IDs from environment variables
 VERIFY_TOKEN = os.getenv("VERIFY_TOKEN")
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
@@ -32,42 +34,35 @@ def extract_buttons(text):
         return [title.strip() for title in titles]
     return []
 
-def handle_campaign_choice(state: dict, message: str) -> dict:
+def handle_campaign_choice(state: dict, message: str) -> tuple[dict, str | None]:
     """
-    Procesa la elección de campaña cuando hay varias opciones.
-    - state: dict que luego LangGraph convierte a ChatState.
-    - message: texto que envía el usuario (ID o número de opción).
+    Si el usuario está eligiendo campaña (campaign_need_choice=True)
+    y el mensaje coincide con uno de los IDs de campaign_options,
+    actualiza el state y devuelve un texto de confirmación.
+
+    Si no aplica, devuelve (state, None).
     """
+    if not state.get("campaign_need_choice"):
+        return state, None
+
     options = state.get("campaign_options") or []
     if not options:
-        # No hay nada que elegir, no tocamos el estado
-        return state
-
+        return state, None
+    
     text = message.strip()
 
-    # Caso 1: el usuario pulsa un botón → el texto ES el ID (ej. "101437")
+    # Texto del botón → es directamente el ID
     if text in options:
-        state["campaign_id"] = str(text)
+        state["campaign_id"] = str(text)  # aseguramos string
         state["campaign_validated"] = True
         state["campaign_need_choice"] = False
-        state["check_messages"].append(
-            f"Perfecto, usaremos la campaña con ID {text}."
-        )
-        return state
+        # opcional: limpiar opciones
+        # state["campaign_options"] = []
 
-    # Caso 2: el usuario escribe "1", "2", etc. (posición en la lista)
-    if text.isdigit():
-        idx = int(text) - 1
-        if 0 <= idx < len(options):
-            selected_id = str(options[idx])
-            state["campaign_id"] = selected_id
-            state["campaign_validated"] = True
-            state["campaign_need_choice"] = False
-            return state
+        reply = f"He seleccionado la campaña con ID {text}. Ahora voy a comprobar el resto de datos."
+        return state, reply
 
-    # Caso 3: no se entiende lo que ha respondido → no marcamos como validada
-    # (Puedes añadir algún flag o que lo gestione la IA en el siguiente turno)
-    return state
+    return state, None
 
 
 
@@ -113,8 +108,34 @@ class WhatsAppMessageHandler:
 
         logging.debug(f"Current state: {state}")
 
-        # Procesamos si el mensaje es la elección de campaña (botón pulsado)
-        handle_campaign_choice(state, message)
+        # CASO ESPECIAL: el usuario está eligiendo campaña por botón
+        state, choice_msg = handle_campaign_choice(state, message)
+        
+        # Tenemos una campaña elegida ⇒ ejecutamos directamente las comprobaciones
+        if choice_msg is not None:
+            # Pasar de dict -> ChatState
+            state = ChatState(**state)
+
+            # Ejecutar nodo de comprobaciones (mismo que el grafo)
+            state = check_record_node(state)
+
+            # Volver a dict para guardarlo en tu memoria
+            response = state.model_dump()
+
+            # Guardar nuevo estado
+            self.update_state(phone_number, response)
+
+            # Montar mensaje a usuario con las comprobaciones
+            check_messages = response.get("check_messages") or []
+            if check_messages:
+                checks_text = "\n".join(str(msg) for msg in check_messages)
+                output_text = f"{choice_msg}\n\n{checks_text}"
+            else:
+                # Si no hay mensajes de check, responde solo la confirmación
+                output_text = choice_msg
+
+            logging.info(f"Assistant response (campaign choice + checks): {output_text}")
+            return output_text
 
         # 3. Ejecutar el grafo (agent + tools + check_record)
         response_state = await agent_with_tools_graph.ainvoke(state)
