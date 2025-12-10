@@ -56,8 +56,7 @@ def handle_campaign_choice(state: dict, message: str) -> tuple[dict, str | None]
         state["campaign_id"] = str(text)  # aseguramos string
         state["campaign_validated"] = True
         state["campaign_need_choice"] = False
-        # opcional: limpiar opciones
-        # state["campaign_options"] = []
+        state["campaign_options"] = []
 
         reply = f"He seleccionado la campaña con ID {text}. Ahora voy a comprobar el resto de datos."
         return state, reply
@@ -110,7 +109,7 @@ class WhatsAppMessageHandler:
 
         # CASO ESPECIAL: el usuario está eligiendo campaña por botón
         state, choice_msg = handle_campaign_choice(state, message)
-        
+
         # Tenemos una campaña elegida ⇒ ejecutamos directamente las comprobaciones
         if choice_msg is not None:
             # Pasar de dict -> ChatState
