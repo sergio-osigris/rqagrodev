@@ -32,7 +32,7 @@ def extract_buttons(text):
         return [title.strip() for title in titles]
     return []
 
-def handle_campaign_choice(self, state: dict, message: str) -> dict:
+def handle_campaign_choice(state: dict, message: str) -> dict:
     """
     Procesa la elección de campaña cuando hay varias opciones.
     - state: dict que luego LangGraph convierte a ChatState.
