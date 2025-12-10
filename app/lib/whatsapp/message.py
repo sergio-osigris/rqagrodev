@@ -50,7 +50,7 @@ def handle_campaign_choice(state: dict, message: str) -> dict:
         state["campaign_id"] = str(text)
         state["campaign_validated"] = True
         state["campaign_need_choice"] = False
-        state["campaign_need_choice"].append(
+        state["check_messages"].append(
             f"Perfecto, usaremos la campaña con ID {text}."
         )
         return state
