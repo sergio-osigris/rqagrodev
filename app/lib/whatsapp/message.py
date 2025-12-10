@@ -440,6 +440,7 @@ class WhatsAppMessageHandler:
                 Dosis=0,
                 Medida_dosis="",
                 Cultivo="",
+                Variedad_Cultivo="",
                 Superficie=0,
             ),
             "record_generated": False,
