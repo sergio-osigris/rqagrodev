@@ -32,43 +32,43 @@ def extract_buttons(text):
         return [title.strip() for title in titles]
     return []
 
-def handle_campaign_choice(state: dict, message: str):
+def handle_campaign_choice(self, state: dict, message: str) -> dict:
     """
-    Si estamos esperando que el usuario elija una campaña (campaign_need_choice=True)
-    y el mensaje coincide con uno de los IDs de campaign_options,
-    guardamos ese ID en el estado.
+    Procesa la elección de campaña cuando hay varias opciones.
+    - state: dict que luego LangGraph convierte a ChatState.
+    - message: texto que envía el usuario (ID o número de opción).
     """
-    if not state.get("campaign_need_choice"):
-        return
-
     options = state.get("campaign_options") or []
     if not options:
-        return
+        # No hay nada que elegir, no tocamos el estado
+        return state
 
-    msg = message.strip()
+    text = message.strip()
 
-    for opt in options:
-        if str(opt["id"]) == msg:
-            # Guardamos en el "state-dict"
-            state["campaign_id"] = str(opt["id"])
+    # Caso 1: el usuario pulsa un botón → el texto ES el ID (ej. "101437")
+    if text in options:
+        state["campaign_id"] = str(text)
+        state["campaign_validated"] = True
+        state["campaign_need_choice"] = False
+        state["campaign_need_choice"].append(
+            f"Perfecto, usaremos la campaña con ID {text}."
+        )
+        return state
+
+    # Caso 2: el usuario escribe "1", "2", etc. (posición en la lista)
+    if text.isdigit():
+        idx = int(text) - 1
+        if 0 <= idx < len(options):
+            selected_id = str(options[idx])
+            state["campaign_id"] = selected_id
             state["campaign_validated"] = True
             state["campaign_need_choice"] = False
+            return state
 
-            # Opcional: también actualizar el record si ya existe
-            # record = state.get("record")
-            # if record is not None:
-            #     # si es un Pydantic, tiene atributos
-            #     try:
-            #         record.Campaña = opt.get("alias") or record.Campaña
-            #         record.Año_campaña = str(opt.get("year") or record.Año_campaña)
-            #     except Exception:
-            #         # si fuera dict:
-            #         if isinstance(record, dict):
-            #             record["Campaña"] = opt.get("alias") or record.get("Campaña")
-            #             record["Año_campaña"] = str(
-            #                 opt.get("year") or record.get("Año_campaña")
-            #             )
-            break
+    # Caso 3: no se entiende lo que ha respondido → no marcamos como validada
+    # (Puedes añadir algún flag o que lo gestione la IA en el siguiente turno)
+    return state
+
 
 
 class WhatsAppMessageHandler:
