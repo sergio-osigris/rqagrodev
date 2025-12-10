@@ -50,7 +50,7 @@ def handle_campaign_choice(state: dict, message: str):
     for opt in options:
         if str(opt["id"]) == msg:
             # Guardamos en el "state-dict"
-            state["campaign_id"] = opt["id"]
+            state["campaign_id"] = str(opt["id"])
             state["campaign_validated"] = True
             state["campaign_need_choice"] = False
 

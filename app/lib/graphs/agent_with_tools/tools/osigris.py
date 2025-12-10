@@ -99,13 +99,7 @@ def validar_explotacion(state: ChatState) -> None:
             options = []
             for obj in datos:
                 info = obj["info"]
-                options.append(
-                    {
-                        "id": info["id"],
-                        "alias": info.get("alias"),
-                        "year": info.get("year"),
-                    }
-                )
+                options.append(str(info["id"]))
 
             state.campaign_validated = False
             state.campaign_need_choice = True
@@ -116,14 +110,8 @@ def validar_explotacion(state: ChatState) -> None:
             # Mensaje amigable para WhatsApp
             lines = ["He encontrado varias campañas con esos datos:"]
 
-            # Texto descriptivo (puedes ajustarlo si quieres menos info)
-            for idx, opt in enumerate(options, start=1):
-                lines.append(
-                    f"{idx}) Año: {opt['year']} | Nombre: {opt['alias']} | ID: {opt['id']}"
-                )
-
             # Botones: SOLO los IDs
-            button_ids = [str(opt["id"]) for opt in options]
+            button_ids = options
 
             lines.append("")  # línea en blanco antes de los botones
             lines.append(f"[button:{'|'.join(button_ids)}]")
