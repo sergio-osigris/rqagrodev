@@ -18,7 +18,7 @@ class ChatState(BaseModel):
     # Campos para validar la campaña
     campaign_validated: Optional[bool] = None
     campaign_id: Optional[str] = None
-    campaign_options: Optional[List[Dict[str, Any]]] = None
+    campaign_options: Optional[List[str]] = None
     campaign_need_choice: bool = False
     campaign_need_fix: bool = False
     check_errors: List[str] = Field(default_factory=list)
