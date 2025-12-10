@@ -59,8 +59,8 @@ def hacer_peticion_get(url) -> str:
 # @tool("ComprobarExplotacion")    
 def validar_explotacion(state: ChatState) -> None:
     """
-    Comprueba campaña en Osigris usando Año_campaña y Campaña del record.
-    Rellena campos en el state y añade mensajes a check_messages.
+    Comprueba campaña en Osigris usando Año_campaña y Campaña del state.
+    Rellena campos en el state y añade mensajes a check_messages y errores a check_errors.
     """
     año = state.record.Año_campaña
     nombre = state.record.Campaña
@@ -114,13 +114,19 @@ def validar_explotacion(state: ChatState) -> None:
             state.record_generated = False
 
             # Mensaje amigable para WhatsApp
-            # Ejemplo: numeramos las opciones
             lines = ["He encontrado varias campañas con esos datos:"]
+
+            # Texto descriptivo (puedes ajustarlo si quieres menos info)
             for idx, opt in enumerate(options, start=1):
                 lines.append(
-                    f"{idx}) ID: {opt['id']} | Año: {opt['year']} | Nombre: {opt['alias']}"
+                    f"{idx}) Año: {opt['year']} | Nombre: {opt['alias']} | ID: {opt['id']}"
                 )
-            lines.append("Responde con el número de la campaña correcta (1, 2, 3...).")
+
+            # Botones: SOLO los IDs
+            button_ids = [str(opt["id"]) for opt in options]
+
+            lines.append("")  # línea en blanco antes de los botones
+            lines.append(f"[button:{'|'.join(button_ids)}]")
 
             msg = "\n".join(lines)
             state.check_messages.append(msg)

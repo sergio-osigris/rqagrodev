@@ -32,6 +32,45 @@ def extract_buttons(text):
         return [title.strip() for title in titles]
     return []
 
+def handle_campaign_choice(self, state: dict, message: str):
+    """
+    Si estamos esperando que el usuario elija una campaña (campaign_need_choice=True)
+    y el mensaje coincide con uno de los IDs de campaign_options,
+    guardamos ese ID en el estado.
+    """
+    if not state.get("campaign_need_choice"):
+        return
+
+    options = state.get("campaign_options") or []
+    if not options:
+        return
+
+    msg = message.strip()
+
+    for opt in options:
+        if str(opt["id"]) == msg:
+            # Guardamos en el "state-dict"
+            state["campaign_id"] = opt["id"]
+            state["campaign_validated"] = True
+            state["campaign_need_choice"] = False
+
+            # Opcional: también actualizar el record si ya existe
+            # record = state.get("record")
+            # if record is not None:
+            #     # si es un Pydantic, tiene atributos
+            #     try:
+            #         record.Campaña = opt.get("alias") or record.Campaña
+            #         record.Año_campaña = str(opt.get("year") or record.Año_campaña)
+            #     except Exception:
+            #         # si fuera dict:
+            #         if isinstance(record, dict):
+            #             record["Campaña"] = opt.get("alias") or record.get("Campaña")
+            #             record["Año_campaña"] = str(
+            #                 opt.get("year") or record.get("Año_campaña")
+            #             )
+            break
+
+
 class WhatsAppMessageHandler:
     def __init__(
         self,
@@ -73,6 +112,9 @@ class WhatsAppMessageHandler:
         state["messages"].append({"role": "user", "content": message})
 
         logging.debug(f"Current state: {state}")
+
+        # Procesamos si el mensaje es la elección de campaña (botón pulsado)
+        handle_campaign_choice(state, message)
 
         # 3. Ejecutar el grafo (agent + tools + check_record)
         response_state = await agent_with_tools_graph.ainvoke(state)

@@ -29,11 +29,6 @@ class ChatAgentActions:
 
         # Reseteo las variables de la campaña para que no guarde el historial.
         # Antes tenia el problema que cuando daba error, cambiaba los años, luego en messages detectaba que habia error y enviaba el error en vez de la nueva comprobacion
-        state.campaign_validated = False
-        state.campaign_need_choice = False
-        state.campaign_need_fix = False
-        state.campaign_id = None
-        state.campaign_options = None
         state.check_errors = []      
         state.check_messages = []    
         state.check_status = None 
