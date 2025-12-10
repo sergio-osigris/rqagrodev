@@ -32,7 +32,7 @@ def extract_buttons(text):
         return [title.strip() for title in titles]
     return []
 
-def handle_campaign_choice(self, state: dict, message: str):
+def handle_campaign_choice(state: dict, message: str):
     """
     Si estamos esperando que el usuario elija una campaña (campaign_need_choice=True)
     y el mensaje coincide con uno de los IDs de campaign_options,
