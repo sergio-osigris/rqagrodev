@@ -16,7 +16,8 @@ class RecordBase(BaseModel):
     Plaga: str = Field(..., alias="Problema en campo", description="Descripción detallada del problema o plaga detectada en el campo que motivó la acción. Ejemplos: 'Fuerte ataque de mildiu en hojas basales', 'Clorosis férrica en brotes jóvenes', 'Compactación del suelo post-lluvias'.")
     Dosis: float = Field(..., title="Medida de la dosis aplicada", description="Medida de la cantidad del producto (fitosanitario o fertilizante) aplicado. Ejemplos: 'kg/ha', 'l/ha'.")
     Medida_dosis: str = Field(..., title="Dosis Aplicada", description="Cantidad del producto (fitosanitario o fertilizante) aplicado. Ejemplos: '1.5', '300', '2'.")
-    Cultivo: str = Field(..., title="Cultivo Afectado/Tratado", description="Nombre del cultivo específico sobre el cual se realizó la acción o se observó el problema. Incluir variedad si es relevante. Ejemplos: 'Trigo candeal - Variedad Anton', 'Olivo - Picual', 'Tomate para industria'.")
+    Cultivo: str = Field(..., title="Cultivo Afectado/Tratado", description="Nombre del cultivo específico sobre el cual se realizó la acción o se observó el problema. Ejemplos: 'Trigo candeal', 'Olivo', 'Tomate para industria'.")
+    Variedad_Cultivo: Optional[str] = Field(..., title="Variedad del Cultivo Afectado/Tratado", description="Variedad del cultivo específico sobre el cual se realizó la acción o se observó el problema. Ejemplos: 'Trigo candeal - *Variedad Anton*', 'Olivo - *Picual*', 'Tomate - *Cherry*'.")
     Superficie: Optional[float] = Field(..., title="Superficie Tratada/Afectada (ha)", description="Área total del terreno, expresada en hectáreas (ha), donde se realizó la aplicación, labor o se detectó el problema. Ejemplo: 25.5.")
 
     class Config:
@@ -31,7 +32,8 @@ class RecordBase(BaseModel):
                 "Plaga": "Presencia de oidio en hojas de pepino",
                 "Dosis": "0.5",
                 "Medida_dosis": "L/ha",
-                "Cultivo": "Pepino Almería - Invernadero Norte",
+                "Cultivo": "Tomate",
+                "Variedad_Cultivo": "Cherry",
                 "Superficie": 2.5
             }
         }
