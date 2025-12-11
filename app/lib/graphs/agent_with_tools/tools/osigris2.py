@@ -1,6 +1,8 @@
 from app.lib.graphs.agent_with_tools.state import ChatState
 import logging
 from .osigris import validar_explotacion, validar_cultivo
+from app.models.record2 import CampaignBase, CropBase, RecordBase
+from datetime import date
 
 def check_record_node(state: ChatState) -> ChatState:
     logging.info("Ejecutando comprobaciones de registro...")
@@ -31,6 +33,16 @@ def check_record_node(state: ChatState) -> ChatState:
             # En un fallo interno, ya no seguimos con más checks
             return state
         
+    # ---------- 3) GUARDAR CULTIVO ----------
+    if state.campaign.validated and state.crop.validated and state.record_generated:
+        # Aqui guardo el cultivo
+
+        # Aqui vacio las variables
+        state.record = RecordBase(Fecha=date.today(),Tratamiento_fitosanitario="",Campaña="",Año_Campaña="",Plaga="",Dosis=0,Medida_dosis="",Cultivo="",Variedad_Cultivo="",Superficie=0).model_dump()
+        state.campaign = CampaignBase(validated= False,id= "",options= [],need_choice= False,need_fix= False).model_dump()
+        state.crop = CropBase(validated= False,sigpacs_id= [],selected_label="",options= {},need_choice= False,need_fix= False).model_dump()
+        state.record_generated = False
+        state.check_messages.append("PROCESO DE GUARDADO CONTRA OSIGRIS COMPLETADO CORRECTAMENTE")
     if state.check_errors:
         state.check_status = "failed"
     else:
