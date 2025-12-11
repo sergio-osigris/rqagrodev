@@ -10,7 +10,7 @@ from app.lib.graphs.agent_with_tools.tools.osigris import validar_explotacion, v
 from app.lib.graphs.agent_with_tools.tools.record import create_record
 from app.lib.graphs.agent_with_tools.tools.utils import get_current_date
 from app.utils.pydantic_formatters import generar_listado_campos
-from app.models.record2 import RecordBase
+from app.models.record2 import RecordBase, CampaignBase, CropBase
 import datetime
 from datetime import date
 MODEL_VERSION = os.getenv("MODEL_VERSION")
@@ -32,7 +32,7 @@ async def run_graph(state: ChatState):
 @router.post("/invoke_ai")
 async def run_graph(message: str):
     from app.prompts import AGENT_WITH_TOOLS_NODE
-    state = ChatState(user_id="00",name="test",record_generated=False,messages=[],record=RecordBase(Fecha=date.today(), Tratamiento_fitosanitario="",Campaña="",Año_Campaña="",Plaga="",Dosis=0, Medida_dosis="", Cultivo="", Variedad_Cultivo="",Superficie=0 ))
+    state = ChatState(user_id="00",name="test",record_generated=False,messages=[],record=RecordBase(Fecha=date.today(), Tratamiento_fitosanitario="",Campaña="",Año_Campaña="",Plaga="",Dosis=0, Medida_dosis="", Cultivo="", Variedad_Cultivo="",Superficie=0 ), campaign= CampaignBase(validated= False,id= "", options= [], need_choice= False, need_fix= False,), crop= CropBase(validated= False,sigpacs_id= [],selected_label="",options= {},need_choice= False,need_fix= False,))
     messages = [
             {"role": "system", "content": AGENT_WITH_TOOLS_NODE.format(user_id="00",name="Daniel García",size=500,listado_campos=generar_listado_campos(RecordBase),current_date=datetime.datetime.now().strftime("%Y-%m-%d"))},
             {"role": "user", "content":message}
