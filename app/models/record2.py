@@ -46,6 +46,18 @@ class CampaignBase(BaseModel):
     need_choice: bool = False
     need_fix: bool = False
 
+    class Config:
+        populate_by_name = True 
+        json_schema_extra = {
+            "example": {
+                "validated": "true",
+                "id": "145574",
+                "options": ["opcion1", "opcion2", "opcion3"],
+                "need_choice": "false",
+                "need_fix": "false"
+            }
+        }
+
 class MetadataOsigris():
 
     type: str = Field(default="Create")
