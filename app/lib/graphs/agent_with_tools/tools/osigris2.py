@@ -10,7 +10,7 @@ def check_record_node(state: ChatState) -> ChatState:
     state.check_errors = []
     
     # ---------- 1) VALIDAR CAMPAÑA ----------
-    if state.campaign_id is None:
+    if state.campaign.id is None:
         try:
             validar_explotacion(state)
         except Exception as e:
@@ -21,7 +21,7 @@ def check_record_node(state: ChatState) -> ChatState:
             return state
 
     # ---------- 2) VALIDAR CULTIVO ----------
-    if state.campaign_id:
+    if state.campaign.id:
         try:
             validar_cultivo(state)
         except Exception as e:

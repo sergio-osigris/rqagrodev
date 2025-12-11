@@ -42,10 +42,10 @@ def handle_campaign_choice(state: dict, message: str) -> tuple[dict, str | None]
 
     Si no aplica, devuelve (state, None).
     """
-    if not state.get("campaign_need_choice"):
+    if not state.get("need_choice"):
         return state, None
 
-    options = state.get("campaign_options") or []
+    options = state.get("options") or []
     if not options:
         return state, None
     
@@ -53,10 +53,10 @@ def handle_campaign_choice(state: dict, message: str) -> tuple[dict, str | None]
 
     # Texto del botón → es directamente el ID
     if text in options:
-        state["campaign_id"] = str(text)  # aseguramos string
-        state["campaign_validated"] = True
-        state["campaign_need_choice"] = False
-        state["campaign_options"] = []
+        state["campaign"]["id"] = str(text)  # aseguramos string
+        state["campaign"]["validated"] = True
+        state["campaign"]["need_choice"] = False
+        state["campaign"]["options"] = []
 
         reply = f"He seleccionado la campaña con ID {text}. Ahora voy a comprobar el resto de datos."
         return state, reply
@@ -156,10 +156,10 @@ class WhatsAppMessageHandler:
         logging.info(response)
 
         # 6. Leer resultados de las comprobaciones, si existen
-        check_messages = response.get("check_messages") or []
-        campaign_need_choice = response.get("campaign_need_choice", False)
-        campaign_need_fix = response.get("campaign_need_fix", False)
-        campaign_validated = response.get("campaign_validated", None)
+        check_messages = response["campaign"]["check_messages"] or []
+        campaign_need_choice = response["campaign"]["need_choice"] or False
+        campaign_need_fix = response["campaign"]["need_fix"] or False
+        campaign_validated = response["campaign"]["validated"] or None
 
         # Monto un único mensaje para devolver por whatsapp con el valor de todas las comprobaciones
         if check_messages:

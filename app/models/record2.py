@@ -38,6 +38,14 @@ class RecordBase(BaseModel):
             }
         }
 
+class CampaignBase(BaseModel):
+    # Campos para validar la campaña
+    validated: Optional[bool] = None
+    id: Optional[str] = None
+    options: Optional[List[str]] = None
+    need_choice: bool = False
+    need_fix: bool = False
+
 class MetadataOsigris():
 
     type: str = Field(default="Create")

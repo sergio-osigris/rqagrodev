@@ -70,11 +70,11 @@ def validar_explotacion(state: ChatState) -> None:
     valido, datos = hacer_peticion_get(url)
 
     # Inicializamos algunos flags
-    state.campaign_validated = False
-    state.campaign_need_choice = False
-    state.campaign_need_fix = False
-    state.campaign_id = None
-    state.campaign_options = None
+    state.campaign.validated = False
+    state.campaign.need_choice = False
+    state.campaign.need_fix = False
+    state.campaign.id = None
+    state.campaign.options = None
     state.check_errors = []      
     state.check_messages = []    
     state.check_status = None    
@@ -84,8 +84,8 @@ def validar_explotacion(state: ChatState) -> None:
             # ---------- CASO 1: UNA SOLA CAMPAÑA ----------
             id_campaña = datos[0]["info"]["id"]
 
-            state.campaign_validated = True
-            state.campaign_id = id_campaña
+            state.campaign.validated = True
+            state.campaign.id = id_campaña
 
             msg = f"Campaña comprobada. ID de Campaña: {id_campaña}"
             state.check_messages.append(msg)
@@ -97,9 +97,9 @@ def validar_explotacion(state: ChatState) -> None:
                 info = obj["info"]
                 options.append(str(info["id"]))
 
-            state.campaign_validated = False
-            state.campaign_need_choice = True
-            state.campaign_options = options
+            state.campaign.validated = False
+            state.campaign.need_choice = True
+            state.campaign.options = options
             # Reiniciar el valor de la variable, puesto que luego tendrá que generarse de nuevo el objeto válido (el registro creado anteriormente no sirve)
             state.record_generated = False
 
@@ -117,8 +117,8 @@ def validar_explotacion(state: ChatState) -> None:
 
     else:
         # ---------- CASO 3: NINGUNA CAMPAÑA ----------
-        state.campaign_need_fix = True
-        state.campaign_validated = False
+        state.campaign.need_fix = True
+        state.campaign.validated = False
         # Reiniciar el valor de la variable, puesto que luego tendrá que generarse de nuevo el objeto válido (el registro creado anteriormente no sirve)
         state.record_generated = False
 
@@ -135,7 +135,7 @@ def validar_cultivo(state: ChatState) -> None:
     Rellena campos en el state y añade mensajes a check_messages y errores a check_errors.
     """
     cultivo=state.record.Cultivo
-    id_campaña=state.campaign_id
+    id_campaña=state.campaign.id
     variedad=state.record.Variedad_Cultivo or ""
     logging.info(f"--Start ComprobarCultivo tool with arguments: {cultivo}, {id_campaña}, {variedad}")
     url = f"{API_URL}/osigrisapi/season/show/{id_campaña}/crop/list?qg1[and]=typecrop,typevariety&typecrop[in]={cultivo}&typevariety[in]={variedad}"
