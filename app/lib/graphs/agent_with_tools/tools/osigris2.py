@@ -10,6 +10,7 @@ def check_record_node(state: ChatState) -> ChatState:
     # reseteamos por si venían de ciclos anteriores
     state.check_messages = []
     state.check_errors = []
+    state.record_to_save = False
     
     # ---------- 1) VALIDAR CAMPAÑA ----------
     if not state.campaign.validated:
@@ -36,7 +37,7 @@ def check_record_node(state: ChatState) -> ChatState:
     # ---------- 3) GUARDAR CULTIVO ----------
     if state.campaign.validated and state.crop.validated:
         # Aqui guardo el cultivo
-
+        state.record_to_save=True
         # Aqui vacio las variables
         state.record = RecordBase(Fecha=date.today(),Tratamiento_fitosanitario="",Campaña="",Año_Campaña="",Plaga="",Dosis=0,Medida_dosis="",Cultivo="",Variedad_Cultivo="",Superficie=0)
         state.campaign = CampaignBase(validated= False,id= "",options= [],need_choice= False,need_fix= False)

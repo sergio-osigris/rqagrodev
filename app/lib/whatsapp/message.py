@@ -196,6 +196,10 @@ class WhatsAppMessageHandler:
                 # Si no hay mensajes de check, responde solo la confirmación
                 output_text = choice_msg
             logging.info(f"Assistant response: {output_text}")
+            ready_save = response.get("record_to_save") or None
+            if ready_save:
+                logging.info("Detected new record generated. Deleting chat history")
+                self.clear_state(phone_number)
             return output_text
         
         # 3. Ejecutar el grafo (agent + tools + check_record)

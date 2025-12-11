@@ -13,6 +13,7 @@ class ChatState(BaseModel):
     name: str = Field(description="Full name of user")
     record_generated: bool = Field(description="Indicates if the current conversation has already been generated a new record in recolector phase.",default=False)
     record: RecordBase = Field(description="")
+    record_to_save: bool = Field(description="Indica si el record se puede guardar ya.",default=False)
     # osigris_token:
 
     campaign: CampaignBase = Field(default_factory=CampaignBase)
