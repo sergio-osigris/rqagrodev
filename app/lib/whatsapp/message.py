@@ -76,6 +76,11 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
     """
     crop = state.get("crop") or {}
 
+    # 🔒 Por si en algún estado viejo crop viene como CropBase:
+    if isinstance(crop, CropBase):
+        crop = crop.model_dump()
+        state["crop"] = crop
+
     # Si no estamos en modo "elegir cultivo", salimos
     if not crop.get("need_choice"):
         return state, None
