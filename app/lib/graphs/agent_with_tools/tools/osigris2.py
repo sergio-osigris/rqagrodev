@@ -34,7 +34,7 @@ def check_record_node(state: ChatState) -> ChatState:
             return state
         
     # ---------- 3) GUARDAR CULTIVO ----------
-    if state.campaign.validated and state.crop.validated and state.record_generated:
+    if state.campaign.validated and state.crop.validated:
         # Aqui guardo el cultivo
 
         # Aqui vacio las variables
