@@ -42,10 +42,10 @@ def handle_campaign_choice(state: dict, message: str) -> tuple[dict, str | None]
 
     Si no aplica, devuelve (state, None).
     """
-    if not state.get("need_choice"):
+    if not state["campaign"]["need_choice"]:
         return state, None
 
-    options = state.get("options") or []
+    options = state["campaign"]["options"] or []
     if not options:
         return state, None
     
