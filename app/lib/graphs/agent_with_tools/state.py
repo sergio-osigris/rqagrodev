@@ -15,7 +15,7 @@ class ChatState(BaseModel):
     record: RecordBase = Field(description="")
     # osigris_token:
 
-    campaign: CampaignBase = Field(description="")
+    campaign: CampaignBase = Field(default_factory=CampaignBase)
     
     check_errors: List[str] = Field(default_factory=list)
     check_status: Optional[str | None] = None
