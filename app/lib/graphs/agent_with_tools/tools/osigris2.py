@@ -38,9 +38,9 @@ def check_record_node(state: ChatState) -> ChatState:
         # Aqui guardo el cultivo
 
         # Aqui vacio las variables
-        state.record = RecordBase(Fecha=date.today(),Tratamiento_fitosanitario="",Campaña="",Año_Campaña="",Plaga="",Dosis=0,Medida_dosis="",Cultivo="",Variedad_Cultivo="",Superficie=0).model_dump()
-        state.campaign = CampaignBase(validated= False,id= "",options= [],need_choice= False,need_fix= False).model_dump()
-        state.crop = CropBase(validated= False,sigpacs_id= [],selected_label="",options= {},need_choice= False,need_fix= False).model_dump()
+        state.record = RecordBase(Fecha=date.today(),Tratamiento_fitosanitario="",Campaña="",Año_Campaña="",Plaga="",Dosis=0,Medida_dosis="",Cultivo="",Variedad_Cultivo="",Superficie=0)
+        state.campaign = CampaignBase(validated= False,id= "",options= [],need_choice= False,need_fix= False)
+        state.crop = CropBase(validated= False,sigpacs_id= [],selected_label="",options= {},need_choice= False,need_fix= False)
         state.record_generated = False
         state.check_messages.append("PROCESO DE GUARDADO CONTRA OSIGRIS COMPLETADO CORRECTAMENTE")
     if state.check_errors:
