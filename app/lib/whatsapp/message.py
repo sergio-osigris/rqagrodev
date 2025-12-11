@@ -42,8 +42,6 @@ def handle_campaign_choice(state: dict, message: str) -> tuple[dict, str | None]
 
     Si no aplica, devuelve (state, None).
     """
-    logging.info(f"New message 10")
-    logging.info(state)
     if not state["campaign"]["need_choice"]:
         return state, None
 
@@ -98,12 +96,9 @@ class WhatsAppMessageHandler:
     async def generate_response(
         self, userInfo: dict, message: str, phone_number: str
     ) -> str:
-        logging.info(f"New message 2")
         logging.debug(f"Current user info: {userInfo}")
-        logging.info(f"New message {userInfo}")
         # 1. Recuperar estado previo
         state = self.get_prev_state(phone_number, userInfo)
-        logging.info(f"New message 3")
         # 2. Añadir mensaje de usuario
         state["messages"].append({"role": "user", "content": message})
 
@@ -319,7 +314,6 @@ class WhatsAppMessageHandler:
 
         # Process the message to generate bot response
         if msg_type == "text" or msg_type == "interactive":
-            logging.info(f"New message 1")
             response_text = await self.generate_response(userInfo, user_message,wa_id)
         elif msg_type == "image":
             if media_id:
