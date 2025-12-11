@@ -96,9 +96,9 @@ class WhatsAppMessageHandler:
     async def generate_response(
         self, userInfo: dict, message: str, phone_number: str
     ) -> str:
-        
+        logging.info(f"New message 2")
         logging.debug(f"Current user info: {userInfo}")
-
+        logging.info(f"New message {userInfo}")
         # 1. Recuperar estado previo
         state = self.get_prev_state(phone_number, userInfo)
 
