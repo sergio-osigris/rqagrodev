@@ -180,6 +180,7 @@ class WhatsAppMessageHandler:
         if choice_msg is not None :
             # Pasar de dict -> ChatState
             state = ChatState(**state)
+            logging.info(f"Prueba: {state}")
             # Ejecutar nodo de comprobaciones (mismo que el grafo)
             state = check_record_node(state)
             # Volver a dict para guardarlo en tu memoria
