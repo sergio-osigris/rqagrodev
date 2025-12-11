@@ -36,6 +36,19 @@ def extract_buttons(text):
 
 from app.models.record2 import CampaignBase  # ya lo tienes importado arriba
 
+def handle_choice(state: dict, message: str) -> tuple[dict, str | None]:
+    # CASO ESPECIAL: el usuario está eligiendo campaña por botón
+    state, campaign_choice_msg = handle_campaign_choice(state, message)
+    if campaign_choice_msg is None:
+        # CASO ESPECIAL: el usuario está eligiendo cultivo por botón
+        state, crop_choice_msg = handle_crop_choice(state, message)
+        if crop_choice_msg is None:
+            
+            return state, "Completadas todas las comprobaciones. Insertado en oSIGris correctamente" 
+        else:
+            return state, crop_choice_msg
+    return state, campaign_choice_msg
+
 def handle_campaign_choice(state: dict, message: str) -> tuple[dict, str | None]:
     campaign = state.get("campaign") or {}
 
@@ -162,22 +175,18 @@ class WhatsAppMessageHandler:
         logging.debug(f"Current state: {state}")
 
         # CASO ESPECIAL: el usuario está eligiendo campaña por botón
-        state, choice_msg = handle_campaign_choice(state, message)
+        state, choice_msg = handle_choice(state, message)
 
-        # Tenemos una campaña elegida ⇒ ejecutamos directamente las comprobaciones
+        # Tenemos una campaña o cultivo elegid@ ⇒ ejecutamos directamente las comprobaciones
         if choice_msg is not None:
             # Pasar de dict -> ChatState
             state = ChatState(**state)
-
             # Ejecutar nodo de comprobaciones (mismo que el grafo)
             state = check_record_node(state)
-
             # Volver a dict para guardarlo en tu memoria
             response = state.model_dump()
-
             # Guardar nuevo estado
             self.update_state(phone_number, response)
-
             # Montar mensaje a usuario con las comprobaciones
             check_messages = response.get("check_messages") or []
             if check_messages:
@@ -186,47 +195,7 @@ class WhatsAppMessageHandler:
             else:
                 # Si no hay mensajes de check, responde solo la confirmación
                 output_text = choice_msg
-
-            logging.info(f"Assistant response (campaign choice + checks): {output_text}")
-            return output_text
-
-        # CASO ESPECIAL: el usuario está eligiendo cultivo por botón
-        state, crop_choice_msg = handle_crop_choice(state, message)
-
-        if crop_choice_msg is not None:
-            # Si quieres, aquí puedes lanzar directamente `check_record_node`
-            # o simplemente devolver el mensaje de confirmación.
-            state_obj = ChatState(**state)
-            state_obj = check_record_node(state_obj)
-            response = state_obj.model_dump()
-            self.update_state(phone_number, response)
-
-            check_messages = response.get("check_messages") or []
-            if check_messages:
-                checks_text = "\n".join(str(msg) for msg in check_messages)
-                output_text = f"{crop_choice_msg}\n\n{checks_text}"
-            else:
-                output_text = crop_choice_msg
-
-            # Se acaba de momento el proceso, limpiar estado de la conversación
-            crop_data = response.get("crop") or {}
-
-            if isinstance(crop_data, CropBase):
-                crop_data = crop_data.model_dump()
-
-            crop_need_choice = crop_data.get("need_choice", False)
-            crop_need_fix = crop_data.get("need_fix", False)
-            crop_validated = crop_data.get("validated", None)
-            if (response.get("record_generated", False) is True
-                and campaign_validated
-                and not campaign_need_choice
-                and not campaign_need_fix
-                and crop_validated
-                and not crop_need_choice
-                and not crop_need_fix):
-                logging.info("Detected new record generated. Deleting chat history")
-                self.clear_state(phone_number)
-
+            logging.info(f"Assistant response: {output_text}")
             return output_text
         
         # 3. Ejecutar el grafo (agent + tools + check_record)
@@ -245,33 +214,41 @@ class WhatsAppMessageHandler:
         # 5. Último mensaje del asistente (el que mandas por WhatsApp al usuario)
         output_text = response["messages"][-1]["content"]
         logging.info(f"Assistant response: {output_text}")
-        logging.info(f"PRUEBA PRA VER EL STATE")
-        logging.info(response)
 
         # 6. Leer resultados de las comprobaciones, si existen
         check_messages = response.get("check_messages") or []
-
-        campaign_data = response.get("campaign") or {}
-
-        if isinstance(campaign_data, CampaignBase):
-            campaign_data = campaign_data.model_dump()
-
-        campaign_need_choice = campaign_data.get("need_choice", False)
-        campaign_need_fix = campaign_data.get("need_fix", False)
-        campaign_validated = campaign_data.get("validated", None)
 
         # Monto un único mensaje para devolver por whatsapp con el valor de todas las comprobaciones
         if check_messages:
             output_text = "\n".join(str(msg) for msg in check_messages)
 
         # 7. Si el registro se ha guardado definitivamente, limpiar estado de la conversación
+        campaign_data = response.get("campaign") or {}
+        if isinstance(campaign_data, CampaignBase):
+            campaign_data = campaign_data.model_dump()
+        campaign_need_choice = campaign_data.get("need_choice", False)
+        campaign_need_fix = campaign_data.get("need_fix", False)
+        campaign_validated = campaign_data.get("validated", None)
+
+        crop_data = response.get("crop") or {}
+        if isinstance(crop_data, CropBase):
+            crop_data = crop_data.model_dump()
+        crop_need_choice = crop_data.get("need_choice", False)
+        crop_need_fix = crop_data.get("need_fix", False)
+        crop_validated = crop_data.get("validated", None)
+
         if (response.get("record_generated", False) is True
             and campaign_validated
             and not campaign_need_choice
-            and not campaign_need_fix):
+            and not campaign_need_fix
+            and crop_validated
+            and not crop_need_choice
+            and not crop_need_fix):
             logging.info("Detected new record generated. Deleting chat history")
             self.clear_state(phone_number)
 
+        logging.info(f"PRUEBA PRA VER EL STATE")
+        logging.info(response)
         return output_text
 
 
