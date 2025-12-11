@@ -475,7 +475,7 @@ class WhatsAppMessageHandler:
                 options= [],
                 need_choice= False,
                 need_fix= False,
-            ),
+            ).model_dump(),
         }
 
     
