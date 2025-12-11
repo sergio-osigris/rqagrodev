@@ -43,11 +43,15 @@ def handle_choice(state: dict, message: str) -> tuple[dict, str | None]:
         # CASO ESPECIAL: el usuario está eligiendo cultivo por botón
         state, crop_choice_msg = handle_crop_choice(state, message)
         if crop_choice_msg is None:
-            
-            return state, "Completadas todas las comprobaciones. Insertado en oSIGris correctamente" 
+            # aqui tengo que llamar a la funcion de guardado
+
+            # y ahora aqui vaciar todas las variables
+            state["campaign"] = CampaignBase(validated= False,id= "",options= [],need_choice= False,need_fix= False).model_dump()
+            state["crop"] = CropBase(validated= False,sigpacs_id= [],selected_label="",options= {},need_choice= False,need_fix= False).model_dump()
+            return state, "Completadas todas las comprobaciones. Insertado en oSIGris correctamente", True
         else:
-            return state, crop_choice_msg
-    return state, campaign_choice_msg
+            return state, crop_choice_msg, False
+    return state, campaign_choice_msg, False
 
 def handle_campaign_choice(state: dict, message: str) -> tuple[dict, str | None]:
     campaign = state.get("campaign") or {}
@@ -175,28 +179,31 @@ class WhatsAppMessageHandler:
         logging.debug(f"Current state: {state}")
 
         # CASO ESPECIAL: el usuario está eligiendo campaña por botón
-        state, choice_msg = handle_choice(state, message)
+        state, choice_msg, finish = handle_choice(state, message)
 
-        # Tenemos una campaña o cultivo elegid@ ⇒ ejecutamos directamente las comprobaciones
-        if choice_msg is not None:
-            # Pasar de dict -> ChatState
-            state = ChatState(**state)
-            # Ejecutar nodo de comprobaciones (mismo que el grafo)
-            state = check_record_node(state)
-            # Volver a dict para guardarlo en tu memoria
-            response = state.model_dump()
-            # Guardar nuevo estado
-            self.update_state(phone_number, response)
-            # Montar mensaje a usuario con las comprobaciones
-            check_messages = response.get("check_messages") or []
-            if check_messages:
-                checks_text = "\n".join(str(msg) for msg in check_messages)
-                output_text = f"{choice_msg}\n\n{checks_text}"
-            else:
-                # Si no hay mensajes de check, responde solo la confirmación
-                output_text = choice_msg
-            logging.info(f"Assistant response: {output_text}")
-            return output_text
+        if finish:
+            return choice_msg
+        else:
+            # Tenemos una campaña o cultivo elegid@ ⇒ ejecutamos directamente las comprobaciones
+            if choice_msg is not None :
+                # Pasar de dict -> ChatState
+                state = ChatState(**state)
+                # Ejecutar nodo de comprobaciones (mismo que el grafo)
+                state = check_record_node(state)
+                # Volver a dict para guardarlo en tu memoria
+                response = state.model_dump()
+                # Guardar nuevo estado
+                self.update_state(phone_number, response)
+                # Montar mensaje a usuario con las comprobaciones
+                check_messages = response.get("check_messages") or []
+                if check_messages:
+                    checks_text = "\n".join(str(msg) for msg in check_messages)
+                    output_text = f"{choice_msg}\n\n{checks_text}"
+                else:
+                    # Si no hay mensajes de check, responde solo la confirmación
+                    output_text = choice_msg
+                logging.info(f"Assistant response: {output_text}")
+                return output_text
         
         # 3. Ejecutar el grafo (agent + tools + check_record)
         response_state = await agent_with_tools_graph.ainvoke(state)
