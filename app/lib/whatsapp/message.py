@@ -36,32 +36,57 @@ def extract_buttons(text):
 
 def handle_campaign_choice(state: dict, message: str) -> tuple[dict, str | None]:
     """
-    Si el usuario está eligiendo campaña (campaign_need_choice=True)
-    y el mensaje coincide con uno de los IDs de campaign_options,
+    Si el usuario está eligiendo campaña (campaign.need_choice=True)
+    y el mensaje coincide con uno de los IDs de campaign.options,
     actualiza el state y devuelve un texto de confirmación.
 
     Si no aplica, devuelve (state, None).
     """
-    if not state["campaign"]["need_choice"]:
+    campaign_obj = state.get("campaign")
+    if campaign_obj is None:
         return state, None
 
-    options = state["campaign"]["options"] or []
+    # --- Normalizamos acceso según el tipo ---
+    if isinstance(campaign_obj, CampaignBase):
+        need_choice = campaign_obj.need_choice
+        options = campaign_obj.options or []
+    elif isinstance(campaign_obj, dict):
+        need_choice = campaign_obj.get("need_choice", False)
+        options = campaign_obj.get("options") or []
+    else:
+        # Tipo raro, no hacemos nada
+        return state, None
+
+    if not need_choice:
+        return state, None
+
     if not options:
         return state, None
-    
+
     text = message.strip()
 
-    # Texto del botón → es directamente el ID
-    if text in options:
-        state["campaign"]["id"] = str(text)  # aseguramos string
-        state["campaign"]["validated"] = True
-        state["campaign"]["need_choice"] = False
-        state["campaign"]["options"] = []
+    # Opción seleccionada debe estar en la lista de IDs
+    if text in [str(o) for o in options]:
+        # Actualizamos campaña según el tipo
+        if isinstance(campaign_obj, CampaignBase):
+            campaign_obj.id = str(text)
+            campaign_obj.validated = True
+            campaign_obj.need_choice = False
+            campaign_obj.options = []
+        else:  # dict
+            campaign_obj["id"] = str(text)
+            campaign_obj["validated"] = True
+            campaign_obj["need_choice"] = False
+            campaign_obj["options"] = []
+
+        # Guardamos de vuelta en el estado
+        state["campaign"] = campaign_obj
 
         reply = f"He seleccionado la campaña con ID {text}. Ahora voy a comprobar el resto de datos."
         return state, reply
 
     return state, None
+
 
 
 
@@ -153,10 +178,13 @@ class WhatsAppMessageHandler:
         logging.info(response)
 
         # 6. Leer resultados de las comprobaciones, si existen
-        check_messages = response["campaign"]["check_messages"] or []
-        campaign_need_choice = response["campaign"]["need_choice"] or False
-        campaign_need_fix = response["campaign"]["need_fix"] or False
-        campaign_validated = response["campaign"]["validated"] or None
+        check_messages = response.get("check_messages") or []
+
+        campaign_data = response.get("campaign") or {}
+        campaign_need_choice = campaign_data.get("need_choice", False)
+        campaign_need_fix = campaign_data.get("need_fix", False)
+        campaign_validated = campaign_data.get("validated", None)
+
 
         # Monto un único mensaje para devolver por whatsapp con el valor de todas las comprobaciones
         if check_messages:
