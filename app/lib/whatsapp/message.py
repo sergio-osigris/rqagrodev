@@ -34,15 +34,16 @@ def extract_buttons(text):
         return [title.strip() for title in titles]
     return []
 
-def handle_campaign_choice(state: dict, message: str) -> tuple[dict, str | None]:
-    """
-    Si el usuario está eligiendo campaña (campaign.need_choice=True)
-    y el mensaje coincide con uno de los IDs de campaign.options,
-    actualiza el state y devuelve un texto de confirmación.
+from app.models.record2 import CampaignBase  # ya lo tienes importado arriba
 
-    Si no aplica, devuelve (state, None).
-    """
+def handle_campaign_choice(state: dict, message: str) -> tuple[dict, str | None]:
     campaign = state.get("campaign") or {}
+
+    # 🔒 Por si en algún estado viejo campaign viene como CampaignBase:
+    if isinstance(campaign, CampaignBase):
+        campaign = campaign.model_dump()
+        state["campaign"] = campaign
+
     if not campaign.get("need_choice"):
         return state, None
 
@@ -52,7 +53,6 @@ def handle_campaign_choice(state: dict, message: str) -> tuple[dict, str | None]
 
     text = message.strip()
 
-    # Opción seleccionada debe estar en la lista de IDs
     if text in [str(o) for o in options]:
         campaign["id"] = str(text)
         campaign["validated"] = True
@@ -158,9 +158,14 @@ class WhatsAppMessageHandler:
         check_messages = response.get("check_messages") or []
 
         campaign_data = response.get("campaign") or {}
+
+        if isinstance(campaign_data, CampaignBase):
+            campaign_data = campaign_data.model_dump()
+
         campaign_need_choice = campaign_data.get("need_choice", False)
         campaign_need_fix = campaign_data.get("need_fix", False)
         campaign_validated = campaign_data.get("validated", None)
+
 
 
         # Monto un único mensaje para devolver por whatsapp con el valor de todas las comprobaciones
@@ -444,7 +449,7 @@ class WhatsAppMessageHandler:
                 Cultivo="",
                 Variedad_Cultivo="",
                 Superficie=0,
-            ),
+            ).model_dump(),
             "record_generated": False,
             "campaign": CampaignBase(
                 validated= False,
