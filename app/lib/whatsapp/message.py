@@ -9,7 +9,7 @@ from typing import Dict
 from app.prompts import AGENT_WITH_TOOLS_NODE
 from app.utils.pydantic_formatters import generar_listado_campos
 from app.models.record import RecordRequest
-from app.models.record2 import RecordBase
+from app.models.record2 import RecordBase, CampaignBase
 import datetime
 from datetime import date
 from app.lib.graphs.agent_with_tools.tools.osigris2 import check_record_node
@@ -447,6 +447,13 @@ class WhatsAppMessageHandler:
                 Superficie=0,
             ),
             "record_generated": False,
+            "campaign": CampaignBase(
+                validated= False,
+                id= "",
+                options= [],
+                need_choice= False,
+                need_fix= False,
+            ),
         }
 
     
