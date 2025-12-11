@@ -43,12 +43,15 @@ def handle_choice(state: dict, message: str) -> tuple[dict, str | None]:
         # CASO ESPECIAL: el usuario está eligiendo cultivo por botón
         state, crop_choice_msg = handle_crop_choice(state, message)
         if crop_choice_msg is None:
-            # aqui tengo que llamar a la funcion de guardado
-
-            # y ahora aqui vaciar todas las variables
-            state["campaign"] = CampaignBase(validated= False,id= "",options= [],need_choice= False,need_fix= False).model_dump()
-            state["crop"] = CropBase(validated= False,sigpacs_id= [],selected_label="",options= {},need_choice= False,need_fix= False).model_dump()
-            return state, "Completadas todas las comprobaciones. Insertado en oSIGris correctamente", True
+            if state["record_generated"] is True:
+                # aqui tengo que llamar a la funcion de guardado
+            
+                # y ahora aqui vaciar todas las variables
+                state["campaign"] = CampaignBase(validated= False,id= "",options= [],need_choice= False,need_fix= False).model_dump()
+                state["crop"] = CropBase(validated= False,sigpacs_id= [],selected_label="",options= {},need_choice= False,need_fix= False).model_dump()
+                return state, "Completadas todas las comprobaciones. Insertado en oSIGris correctamente", True
+            else:
+                state, None, False
         else:
             return state, crop_choice_msg, False
     return state, campaign_choice_msg, False
