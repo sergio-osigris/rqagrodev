@@ -317,6 +317,7 @@ class WhatsAppMessageHandler:
 
         # Process the message to generate bot response
         if msg_type == "text" or msg_type == "interactive":
+            logging.info(f"New message 1")
             response_text = await self.generate_response(userInfo, user_message,wa_id)
         elif msg_type == "image":
             if media_id:
