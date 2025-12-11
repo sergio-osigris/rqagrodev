@@ -182,6 +182,11 @@ class WhatsAppMessageHandler:
         state, choice_msg, finish = handle_choice(state, message)
 
         if finish:
+            # Pasar de dict -> ChatState
+            state = ChatState(**state)
+            response = state.model_dump()
+            logging.info(f"PRUEBA PRA VER EL STATE")
+            logging.info(response)
             return choice_msg
         else:
             # Tenemos una campaña o cultivo elegid@ ⇒ ejecutamos directamente las comprobaciones
