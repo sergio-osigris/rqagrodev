@@ -42,6 +42,8 @@ def handle_campaign_choice(state: dict, message: str) -> tuple[dict, str | None]
 
     Si no aplica, devuelve (state, None).
     """
+    logging.info(f"New message 10")
+    logging.info(state)
     if not state["campaign"]["need_choice"]:
         return state, None
 
@@ -101,7 +103,7 @@ class WhatsAppMessageHandler:
         logging.info(f"New message {userInfo}")
         # 1. Recuperar estado previo
         state = self.get_prev_state(phone_number, userInfo)
-
+        logging.info(f"New message 3")
         # 2. Añadir mensaje de usuario
         state["messages"].append({"role": "user", "content": message})
 
