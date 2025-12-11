@@ -227,27 +227,7 @@ class WhatsAppMessageHandler:
             output_text = "\n".join(str(msg) for msg in check_messages)
 
         # 7. Si el registro se ha guardado definitivamente, limpiar estado de la conversación
-        campaign_data = response.get("campaign") or {}
-        if isinstance(campaign_data, CampaignBase):
-            campaign_data = campaign_data.model_dump()
-        campaign_need_choice = campaign_data.get("need_choice", False)
-        campaign_need_fix = campaign_data.get("need_fix", False)
-        campaign_validated = campaign_data.get("validated", None)
-
-        crop_data = response.get("crop") or {}
-        if isinstance(crop_data, CropBase):
-            crop_data = crop_data.model_dump()
-        crop_need_choice = crop_data.get("need_choice", False)
-        crop_need_fix = crop_data.get("need_fix", False)
-        crop_validated = crop_data.get("validated", None)
-
-        if (response.get("record_generated", False) is True
-            and campaign_validated
-            and not campaign_need_choice
-            and not campaign_need_fix
-            and crop_validated
-            and not crop_need_choice
-            and not crop_need_fix):
+        if (response.get("record_to_save", False) is True):
             logging.info("Detected new record generated. Deleting chat history")
             self.clear_state(phone_number)
 
