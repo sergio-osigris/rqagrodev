@@ -42,24 +42,11 @@ def handle_campaign_choice(state: dict, message: str) -> tuple[dict, str | None]
 
     Si no aplica, devuelve (state, None).
     """
-    campaign_obj = state.get("campaign")
-    if campaign_obj is None:
+    campaign = state.get("campaign") or {}
+    if not campaign.get("need_choice"):
         return state, None
 
-    # --- Normalizamos acceso según el tipo ---
-    if isinstance(campaign_obj, CampaignBase):
-        need_choice = campaign_obj.need_choice
-        options = campaign_obj.options or []
-    elif isinstance(campaign_obj, dict):
-        need_choice = campaign_obj.get("need_choice", False)
-        options = campaign_obj.get("options") or []
-    else:
-        # Tipo raro, no hacemos nada
-        return state, None
-
-    if not need_choice:
-        return state, None
-
+    options = campaign.get("options") or []
     if not options:
         return state, None
 
@@ -67,27 +54,17 @@ def handle_campaign_choice(state: dict, message: str) -> tuple[dict, str | None]
 
     # Opción seleccionada debe estar en la lista de IDs
     if text in [str(o) for o in options]:
-        # Actualizamos campaña según el tipo
-        if isinstance(campaign_obj, CampaignBase):
-            campaign_obj.id = str(text)
-            campaign_obj.validated = True
-            campaign_obj.need_choice = False
-            campaign_obj.options = []
-        else:  # dict
-            campaign_obj["id"] = str(text)
-            campaign_obj["validated"] = True
-            campaign_obj["need_choice"] = False
-            campaign_obj["options"] = []
+        campaign["id"] = str(text)
+        campaign["validated"] = True
+        campaign["need_choice"] = False
+        campaign["options"] = []
 
-        # Guardamos de vuelta en el estado
-        state["campaign"] = campaign_obj
+        state["campaign"] = campaign
 
         reply = f"He seleccionado la campaña con ID {text}. Ahora voy a comprobar el resto de datos."
         return state, reply
 
     return state, None
-
-
 
 
 class WhatsAppMessageHandler:
