@@ -21,7 +21,7 @@ def check_record_node(state: ChatState) -> ChatState:
             return state
 
     # ---------- 2) VALIDAR CULTIVO ----------
-    if state.campaign.validated and not state.campaign.need_choice and not state.campaign.need_fix:
+    if state.campaign.validated and not state.campaign.need_choice and not state.campaign.need_fix and not state.crop.validated:
         try:
             validar_cultivo(state)
         except Exception as e:

@@ -9,7 +9,7 @@ from typing import Dict
 from app.prompts import AGENT_WITH_TOOLS_NODE
 from app.utils.pydantic_formatters import generar_listado_campos
 from app.models.record import RecordRequest
-from app.models.record2 import RecordBase, CampaignBase
+from app.models.record2 import RecordBase, CampaignBase, CropBase
 import datetime
 from datetime import date
 from app.lib.graphs.agent_with_tools.tools.osigris2 import check_record_node
@@ -64,6 +64,56 @@ def handle_campaign_choice(state: dict, message: str) -> tuple[dict, str | None]
         reply = f"He seleccionado la campaña con ID {text}. Ahora voy a comprobar el resto de datos."
         return state, reply
 
+    return state, None
+
+def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
+    """
+    Si el usuario está eligiendo cultivo (crop.need_choice=True)
+    y el mensaje coincide con una de las opciones (keys de crop.options),
+    actualiza el state y devuelve un texto de confirmación.
+
+    Si no aplica, devuelve (state, None).
+    """
+    crop = state.get("crop") or {}
+
+    # Si no estamos en modo "elegir cultivo", salimos
+    if not crop.get("need_choice"):
+        return state, None
+
+    options = crop.get("options") or {}
+    if not options:
+        return state, None
+
+    text = message.strip()
+
+    # El texto del botón es el label, ej: "Tomate-Cherry"
+    if text in options:
+        sigpacs_ids = options[text] or []
+
+        crop["selected_label"] = text
+        crop["sigpacs_ids"] = [str(s) for s in sigpacs_ids]
+        crop["validated"] = True
+        crop["need_choice"] = False
+        crop["need_fix"] = False
+
+        state["crop"] = crop
+
+        # Mensaje de confirmación para el usuario
+        if crop["sigpacs_ids"]:
+            ids_str = ", ".join(crop["sigpacs_ids"])
+            reply = (
+                f"He seleccionado el cultivo/variedad '{text}'. "
+                f"IDs SIGPAC asociados: {ids_str}."
+            )
+        else:
+            reply = (
+                f"He seleccionado el cultivo/variedad '{text}', "
+                "pero no he encontrado SIGPACs asociados."
+            )
+
+        return state, reply
+
+    # Si el texto no coincide con ninguna opción, no hacemos nada especial
     return state, None
 
 
@@ -135,6 +185,45 @@ class WhatsAppMessageHandler:
             logging.info(f"Assistant response (campaign choice + checks): {output_text}")
             return output_text
 
+        # CASO ESPECIAL: el usuario está eligiendo cultivo por botón
+        state, crop_choice_msg = handle_crop_choice(state, message)
+
+        if crop_choice_msg is not None:
+            # Si quieres, aquí puedes lanzar directamente `check_record_node`
+            # o simplemente devolver el mensaje de confirmación.
+            state_obj = ChatState(**state)
+            state_obj = check_record_node(state_obj)
+            response = state_obj.model_dump()
+            self.update_state(phone_number, response)
+
+            check_messages = response.get("check_messages") or []
+            if check_messages:
+                checks_text = "\n".join(str(msg) for msg in check_messages)
+                output_text = f"{crop_choice_msg}\n\n{checks_text}"
+            else:
+                output_text = crop_choice_msg
+
+            # Se acaba de momento el proceso, limpiar estado de la conversación
+            crop_data = response.get("crop") or {}
+
+            if isinstance(crop_data, CropBase):
+                crop_data = crop_data.model_dump()
+
+            crop_need_choice = crop_data.get("need_choice", False)
+            crop_need_fix = crop_data.get("need_fix", False)
+            crop_validated = crop_data.get("validated", None)
+            if (response.get("record_generated", False) is True
+                and campaign_validated
+                and not campaign_need_choice
+                and not campaign_need_fix
+                and crop_validated
+                and not crop_need_choice
+                and not crop_need_fix):
+                logging.info("Detected new record generated. Deleting chat history")
+                self.clear_state(phone_number)
+
+            return output_text
+        
         # 3. Ejecutar el grafo (agent + tools + check_record)
         response_state = await agent_with_tools_graph.ainvoke(state)
 
@@ -165,8 +254,6 @@ class WhatsAppMessageHandler:
         campaign_need_choice = campaign_data.get("need_choice", False)
         campaign_need_fix = campaign_data.get("need_fix", False)
         campaign_validated = campaign_data.get("validated", None)
-
-
 
         # Monto un único mensaje para devolver por whatsapp con el valor de todas las comprobaciones
         if check_messages:
@@ -455,6 +542,14 @@ class WhatsAppMessageHandler:
                 validated= False,
                 id= "",
                 options= [],
+                need_choice= False,
+                need_fix= False,
+            ).model_dump(),
+            "crop": CropBase(
+                validated= False,
+                sigpacs_id= [],
+                selected_label="",
+                options= {},
                 need_choice= False,
                 need_fix= False,
             ).model_dump(),

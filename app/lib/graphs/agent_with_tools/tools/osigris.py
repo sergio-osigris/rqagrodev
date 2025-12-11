@@ -139,20 +139,67 @@ def validar_cultivo(state: ChatState) -> None:
     variedad=state.record.Variedad_Cultivo or ""
     logging.info(f"--Start ComprobarCultivo tool with arguments: {cultivo}, {id_campaña}, {variedad}")
     url = f"{API_URL}/osigrisapi/season/show/{id_campaña}/crop/list?qg1[and]=typecrop,typevariety&typecrop[in]={cultivo}&typevariety[in]={variedad}"
+
+    # Inicializamos algunos flags
+    state.crop.validated = False
+    state.crop.need_choice = False
+    state.crop.need_fix = False
+    state.crop.sigpacs_ids = []
+    state.crop.selected_label = ""
+    state.crop.options = {}
+    state.check_errors = []      
+    state.check_messages = []    
+    state.check_status = None   
+    
     valido, datos = hacer_peticion_get(url)
     if valido=="si":
         if len(datos) == 1:
-            sigpacs_id=[item["id"] for item in datos[0]["sigpac"]]
-            msg = f"Cultivo comprobado correctamente en campaña. IDs de sigpacs obtenidos: {sigpacs_id}"
+            # ---------- CASO 1: UN ÚNICO CULTIVO: Obtenemos correctamente sus sigpacs ---------- 
+            state.crop.validated = True
+            state.crop.sigpacs_ids=[item["id"] for item in datos[0]["sigpac"]]
+            msg = f"Cultivo comprobado correctamente en campaña. IDs de sigpacs obtenidos: {state.crop.sigpacs_ids}"
             state.check_messages.append(msg)
         else:
-            nombres = []
+            # ---------- CASO 2: VARIOS CULTIVOS EN LA CAMPAÑA ----------
+            # Mapa label → lista de sigpacs_ids
+            opciones: dict[str, list[str]] = {}
+            labels: list[str] = []
+
             for d in datos:
                 nombre = d["subtype"]["typecrop"]["name"]
                 variedad = d["subtype"]["name"]
-                nombres.append(f"{nombre}-{variedad}")
-            msg = f"Existen varios cultivos en la campaña indicada. Elige uno de estos cultivos-variedad: {nombres}" 
-            state.check_messages.append(msg)  
+                label = f"{nombre}-{variedad}"
+
+                # lista de IDs sigpac asociados a ese cultivo/variedad
+                sigpacs_ids = [item["id"] for item in d.get("sigpac", [])]
+
+                opciones[label] = sigpacs_ids
+                labels.append(label)
+
+            state.crop.validated = False
+            state.crop.need_choice = True
+            state.crop.need_fix = False
+            state.crop.options = opciones
+            # Reiniciar el valor de la variable, puesto que luego tendrá que generarse 
+            # de nuevo el objeto válido (el registro creado anteriormente no sirve)
+            state.record_generated = False
+
+            # Mensaje amigable para WhatsApp
+            lines = ["He encontrado varios cultivos/variedades en la campaña indicada."]
+            lines.append("Elige uno de estos cultivos-variedad:")
+
+            # Botones: los textos visibles serán los labels (e.g. "Tomate-Cherry")
+            lines.append("")
+            lines.append(f"[button:{'|'.join(labels)}]")
+
+            msg = "\n".join(lines)
+            state.check_messages.append(msg)
+
     else:
-        msg = f"No encuentro ningún cultivo en la campaña indicada"
+        # ---------- CASO 3: NINGÚN CULTIVO ----------
+        state.crop.need_fix = True
+        state.crop.validated = False
+        # Reiniciar el valor de la variable, puesto que luego tendrá que generarse de nuevo el objeto válido (el registro creado anteriormente no sirve)
+        state.record_generated = False
+        msg = f"No encuentro ningún cultivo en la campaña indicada en oSIGris. Revisa el nombre/variedad."
         state.check_messages.append(msg) 

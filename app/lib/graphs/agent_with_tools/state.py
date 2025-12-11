@@ -3,7 +3,7 @@ from typing import Annotated, Literal, Optional
 from langchain_core.messages import BaseMessage
 import operator
 from typing import List,Dict, Any
-from app.models.record2 import RecordBase, CampaignBase
+from app.models.record2 import RecordBase, CampaignBase, CropBase
 
 class ChatState(BaseModel):
     # We store a pure Python list of dicts:
@@ -16,6 +16,7 @@ class ChatState(BaseModel):
     # osigris_token:
 
     campaign: CampaignBase = Field(default_factory=CampaignBase)
+    crop: CropBase = Field(default_factory=CropBase)
     
     check_errors: List[str] = Field(default_factory=list)
     check_status: Optional[str | None] = None

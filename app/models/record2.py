@@ -46,6 +46,18 @@ class CampaignBase(BaseModel):
     need_choice: bool = False
     need_fix: bool = False
 
+class CropBase(BaseModel):
+    # Campos para validar el cultivo
+    validated: Optional[bool] = None
+    # IDs finalmente elegidos para ese cultivo/variedad
+    sigpacs_ids: list[str] = []
+    # Texto elegido (por ejemplo "Tomate - Cherry")
+    selected_label: Optional[str] = None
+    # Mapa: label → lista de IDs
+    options: dict[str, list[str]] = {}
+    need_choice: bool = False
+    need_fix: bool = False
+
 class MetadataOsigris():
 
     type: str = Field(default="Create")
