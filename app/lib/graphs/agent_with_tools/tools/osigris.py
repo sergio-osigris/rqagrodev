@@ -80,7 +80,7 @@ def validar_explotacion(state: ChatState) -> None:
             id_campaña = datos[0]["info"]["id"]
 
             state.campaign.validated = True
-            state.campaign.id = id_campaña
+            state.campaign.id = str(id_campaña)
 
             msg = f"Campaña comprobada. ID de Campaña: {id_campaña}"
             state.check_messages.append(msg)
