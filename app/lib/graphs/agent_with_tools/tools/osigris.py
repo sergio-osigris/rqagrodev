@@ -3,8 +3,6 @@ import requests
 from app.lib.graphs.agent_with_tools.state import ChatState
 
 API_URL = "https://qnur3yjwqg.execute-api.eu-west-3.amazonaws.com"  
-# chat_graph.py (por ejemplo)
-import logging
 
 def obtener_access_token() -> str:
     url = "https://qnur3yjwqg.execute-api.eu-west-3.amazonaws.com/osigrisapi/oauth2/authentication/"
@@ -75,9 +73,6 @@ def validar_explotacion(state: ChatState) -> None:
     state.campaign.need_fix = False
     state.campaign.id = None
     state.campaign.options = None
-    state.check_errors = []      
-    state.check_messages = []    
-    state.check_status = None    
 
     if valido == "si":
         if len(datos) == 1:
@@ -100,18 +95,13 @@ def validar_explotacion(state: ChatState) -> None:
             state.campaign.validated = False
             state.campaign.need_choice = True
             state.campaign.options = options
-            # Reiniciar el valor de la variable, puesto que luego tendrá que generarse de nuevo el objeto válido (el registro creado anteriormente no sirve)
-            state.record_generated = False
 
             # Mensaje amigable para WhatsApp
             lines = ["He encontrado varias campañas con esos datos:"]
-
             # Botones: SOLO los IDs
             button_ids = options
-
             lines.append("")  # línea en blanco antes de los botones
             lines.append(f"[button:{'|'.join(button_ids)}]")
-
             msg = "\n".join(lines)
             state.check_messages.append(msg)
 
@@ -146,10 +136,7 @@ def validar_cultivo(state: ChatState) -> None:
     state.crop.need_fix = False
     state.crop.sigpacs_ids = []
     state.crop.selected_label = ""
-    state.crop.options = {}
-    state.check_errors = []      
-    state.check_messages = []    
-    state.check_status = None   
+    state.crop.options = {} 
     
     valido, datos = hacer_peticion_get(url)
     if valido=="si":
@@ -183,18 +170,13 @@ def validar_cultivo(state: ChatState) -> None:
             state.crop.need_choice = True
             state.crop.need_fix = False
             state.crop.options = opciones
-            # Reiniciar el valor de la variable, puesto que luego tendrá que generarse 
-            # de nuevo el objeto válido (el registro creado anteriormente no sirve)
-            state.record_generated = False
 
             # Mensaje amigable para WhatsApp
             lines = ["He encontrado varios cultivos/variedades en la campaña indicada."]
             lines.append("Elige uno de estos cultivos-variedad:")
-
             # Botones: los textos visibles serán los labels (e.g. "Tomate-Cherry")
             lines.append("")
             lines.append(f"[button:{'|'.join(labels)}]")
-
             msg = "\n".join(lines)
             state.check_messages.append(msg)
 

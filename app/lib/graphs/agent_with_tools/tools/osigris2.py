@@ -11,6 +11,7 @@ def check_record_node(state: ChatState) -> ChatState:
     state.check_messages = []
     state.check_errors = []
     state.record_to_save = False
+    state.check_status = None 
     
     # ---------- 1) VALIDAR CAMPAÑA ----------
     if not state.campaign.validated:

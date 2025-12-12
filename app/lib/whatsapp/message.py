@@ -173,15 +173,15 @@ class WhatsAppMessageHandler:
 
         logging.debug(f"Current state: {state}")
 
-        # CASO ESPECIAL: el usuario está eligiendo campaña por botón
+        # CASO ESPECIAL: el usuario está eligiendo alguna opción de campaña/cultivo por botón
         state, choice_msg = handle_choice(state, message)
 
-        # Tenemos una campaña o cultivo elegid@ ⇒ ejecutamos directamente las comprobaciones
+        # Tenemos una campaña o cultivo elegid@ ⇒ ejecutamos directamente las comprobaciones sin pasar por el agente y las tools como CreateRecord
         if choice_msg is not None :
             # Pasar de dict -> ChatState
             state = ChatState(**state)
             logging.info(f"Prueba: {state}")
-            # Ejecutar nodo de comprobaciones (mismo que el grafo)
+            # Ejecutar nodo de comprobaciones directamente(mismo que el grafo)
             state = check_record_node(state)
             # Volver a dict para guardarlo en tu memoria
             response = state.model_dump()
@@ -198,6 +198,7 @@ class WhatsAppMessageHandler:
             logging.info(f"Assistant response: {output_text}")
             ready_save = response.get("record_to_save") or None
             if ready_save:
+                # Resetear estado si acabamos de hacer un guardado
                 logging.info("Detected new record generated. Deleting chat history")
                 self.clear_state(phone_number)
             return output_text
@@ -371,10 +372,6 @@ class WhatsAppMessageHandler:
         # Add the incoming user message to chat history
         userInfo = await self._getUserInfo(wa_id)
 
-        # self.add_to_history(wa_id, user_message, "user",userInfo=userInfo)
-        # self.update_state(wa_id, response?)
-        # current_history = self.get_chat_history(wa_id)
-
         # Process the message to generate bot response
         if msg_type == "text" or msg_type == "interactive":
             response_text = await self.generate_response(userInfo, user_message,wa_id)
@@ -449,21 +446,6 @@ class WhatsAppMessageHandler:
                 logging.error(f"Failed to download media: {resp.status}")
                 return "Error downloading media file"
 
-    # def add_to_history(self, user_id: str, message: str, sender: str,id:str = "",userInfo:Dict = None):
-    #     if user_id not in self.chat_history:
-    #         self.chat_history[user_id] = []
-    #         self.chat_ids[user_id] = None
-    #     if len(self.chat_history[user_id])==0:
-    #         logging.info(f"Initializing chat with system prompt")
-    #         self.chat_history[user_id].append({"role":"system", "content":AGENT_WITH_TOOLS_NODE.format(
-    #             user_id=userInfo.get("user_id", "Desconocido"),
-    #             name=userInfo.get("name", "Desconocido"),
-    #             size=userInfo.get("Hectáreas", "Desconocido"),
-    #             listado_campos=generar_listado_campos(RecordRequest),current_date=datetime.datetime.now().strftime("%Y-%m-%d")
-    #                 ),"tool_call_id":"",
-    #             })
-    #     self.chat_history[user_id].append({"role":sender, "content":message,"tool_call_id":id})
-
     def update_state(self, user_id: str, state: dict):
         # state es un AddableValuesDict (dict-like)
         self.chat_history[user_id] = state
@@ -527,16 +509,6 @@ class WhatsAppMessageHandler:
             self.chat_history.pop(user_id, None)
         if user_id in self.chat_ids:
             self.chat_ids.pop(user_id, None)
-
-    # def get_chat_history(self, user_id: str):
-    #     return self.chat_history.get(user_id, [])
-    
-    # def clear_chat_history(self, user_id: str):
-    #     if user_id in self.chat_history: 
-    #         self.chat_history[user_id] = []
-    #         self.chat_ids[user_id] = None
-    #     else:
-    #         logging.warning(f"User {user_id} not found in chat history")
 
     def convert_chat_history_to_messages(
         self, chat_history: list[Dict[str, str]]
