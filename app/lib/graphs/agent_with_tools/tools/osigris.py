@@ -2,6 +2,7 @@ import logging
 import requests
 from app.lib.graphs.agent_with_tools.state import ChatState
 from difflib import get_close_matches
+from typing import Dict, Any
 
 API_URL = "https://qnur3yjwqg.execute-api.eu-west-3.amazonaws.com"  
 
@@ -158,7 +159,7 @@ def validar_cultivo(state: ChatState) -> None:
         else:
             # ---------- CASO 2: VARIOS CULTIVOS EN LA CAMPAÑA ----------
             # Mapa label → lista de sigpacs_ids
-            opciones: {}
+            opciones: Dict[str, Dict[str, Any]] = {}
             labels: list[str] = []
 
             for d in datos:
