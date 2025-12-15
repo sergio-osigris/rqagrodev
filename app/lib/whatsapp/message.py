@@ -111,10 +111,6 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
         sigpacs = chosen.get("sigpacs_ids", [])
         crop["sigpacs_ids"] = [str(s) for s in sigpacs]
         crop["surface"]=chosen.get("surface", 0.0)
-        crop["validated"] = True
-        crop["need_choice"] = False
-        crop["need_fix"] = False
-        crop["options"] = {}
 
         state["crop"] = crop
 
@@ -126,6 +122,10 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
                 f"IDs SIGPAC asociados: {ids_str}."
                 f"superficie asociada: {crop["surface"]}."
             )
+            crop["validated"] = True
+            crop["need_choice"] = False
+            crop["need_fix"] = False
+            crop["options"] = {}
         else:
             reply = (
                 f"He seleccionado el cultivo/variedad '{text}', "
