@@ -243,6 +243,7 @@ def validar_measure(state: ChatState) -> None:
     valido, datos = hacer_peticion_get(url)
     if valido=="si":
         state.measure_validated = True
+        state.phytosanitary_parcel.info.md = datos[0]
         msg = "Medida comprobada correctamente en oSIGris"
         state.check_messages.append(msg)
     else:
