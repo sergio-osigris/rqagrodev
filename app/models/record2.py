@@ -56,7 +56,7 @@ class CropBase(BaseModel):
     # Mapa: label → lista de IDs
     options: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
     # superficie finalmente elegida para ese cultivo/variedad
-    surface: list[str] = []
+    surface: float = 0.0
     need_choice: bool = False
     need_fix: bool = False
 
