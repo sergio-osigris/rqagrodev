@@ -108,8 +108,9 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
         chosen = options[text] or []
         logging.info(f"Assistant response: {chosen}")
         crop["selected_label"] = text
-        # crop["sigpacs_ids"] = [str(s) for s in chosen.get("sigpacs_id")]
-        # crop["surface"]=chosen.get("surface")
+        sigpacs = chosen.get("sigpacs_ids", [])
+        crop["sigpacs_ids"] = [str(s) for s in sigpacs]
+        crop["surface"]=chosen.get("surface", 0.0)
         crop["validated"] = True
         crop["need_choice"] = False
         crop["need_fix"] = False
