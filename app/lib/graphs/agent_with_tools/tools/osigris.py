@@ -1,6 +1,7 @@
 import logging
 import requests
 from app.lib.graphs.agent_with_tools.state import ChatState
+from difflib import get_close_matches
 
 API_URL = "https://qnur3yjwqg.execute-api.eu-west-3.amazonaws.com"  
 
@@ -118,7 +119,6 @@ def validar_explotacion(state: ChatState) -> None:
         )
         state.check_messages.append(msg)
 
-   
 def validar_cultivo(state: ChatState) -> None:
     """Usa esta función para comprobar si existe el cultivo en la campaña en osigris, cogiendo del state el nombre del cultivo y el 
     ID de la campaña
@@ -187,4 +187,94 @@ def validar_cultivo(state: ChatState) -> None:
         # Reiniciar el valor de la variable, puesto que luego tendrá que generarse de nuevo el objeto válido (el registro creado anteriormente no sirve)
         state.record_generated = False
         msg = f"No encuentro ningún cultivo en la campaña indicada en oSIGris. Revisa el nombre/variedad."
+        state.check_messages.append(msg) 
+
+def validar_infeccion(state: ChatState) -> None:
+    """Usa esta función para comprobar si existe la infeccion en la lista oficial de osigris,
+    filtrando por la infeccion indicada por el usuario.
+    Rellena campos en el state y añade mensajes a check_messages y errores a check_errors.
+    """
+    plaga=state.record.Plaga
+    logging.info(f"--Start ComprobarInfeccion tool with arguments: {plaga}")
+    url = f"{API_URL}/osigrisapi/master/infection/list?qg1[or]=name,code&name[in]={plaga}&code[in]={plaga}&simplified"
+
+    # Inicializamos algunos flags
+    state.infection_validated = False
+    
+    valido, datos = hacer_peticion_get(url)
+    if valido=="si":
+        name_to_item = {item["name"]: item for item in datos if item.get("name")}
+        names = list(name_to_item.keys())
+        match = get_close_matches(plaga, names, n=1, cutoff=0.75)
+        best = match[0] if match else None
+        # best_item = name_to_item[best] if best else None
+        if best:
+            state.infection_validated = True
+            msg = "Infección comprobada correctamente en oSIGris: "+best
+        else:
+            state.record_generated = False
+            msg = f"No encuentro ninguna infección/plaga parecida a la indicada en la lista oficial de oSIGris. Revisa el nombre."
+        state.check_messages.append(msg)
+    else:
+        # ---------- CASO 2: NINGUNA INFECCIÓN ----------
+        # Reiniciar el valor de la variable, puesto que luego tendrá que generarse de nuevo el objeto válido (el registro creado anteriormente no sirve)
+        state.record_generated = False
+        msg = f"No encuentro ninguna infección/plaga parecida a la indicada en la lista oficial de oSIGris. Revisa el nombre."
+        state.check_messages.append(msg) 
+
+def validar_measure(state: ChatState) -> None:
+    """Usa esta función para comprobar si existe la unidad de medida de dosis en la lista oficial de osigris,
+    filtrando por la unidad indicada por el usuario.
+    Rellena campos en el state y añade mensajes a check_messages y errores a check_errors.
+    """
+    measure=state.record.Medida_dosis
+    logging.info(f"--Start ComprobarMeasure tool with arguments: {measure}")
+    url = f"{API_URL}/osigrisapi/master/measure/list?qg1[and]=typemeasure,symbol&typemeasure[eq]=1&symbol[eq]={measure}"
+
+    # Inicializamos algunos flags
+    state.measure_validated = False
+    
+    valido, datos = hacer_peticion_get(url)
+    if valido=="si":
+        state.measure_validated = True
+        msg = "Medida comprobada correctamente en oSIGris"
+        state.check_messages.append(msg)
+    else:
+        # ---------- CASO 2: NINGUNA MEDIDA ----------
+        # Reiniciar el valor de la variable, puesto que luego tendrá que generarse de nuevo el objeto válido (el registro creado anteriormente no sirve)
+        state.record_generated = False
+        msg = f"No encuentro ninguna unidad de medida de dosis parecida a la indicada en la lista oficial de oSIGris. Revisa el simbolo."
+        state.check_messages.append(msg)         
+
+def validar_fitosanitario(state: ChatState) -> None:
+    """Usa esta función para comprobar si existe el fitosanitario en la lista oficial de osigris,
+    filtrando por el fitosanitario indicado por el usuario.
+    Rellena campos en el state y añade mensajes a check_messages y errores a check_errors.
+    """
+    fitosanitario=state.record.Tratamiento_fitosanitario
+    logging.info(f"--Start ComprobarFitosanitario tool with arguments: {fitosanitario}")
+    url = f"{API_URL}/osigrisapi/master/typephytosanitary/list?qg1[or]=name,code&name[in]={fitosanitario}&code[in]={fitosanitario}&simplified"
+
+    # Inicializamos algunos flags
+    state.phytosanitary_validated = False
+    
+    valido, datos = hacer_peticion_get(url)
+    if valido=="si":
+        name_to_item = {item["name"]: item for item in datos if item.get("name")}
+        names = list(name_to_item.keys())
+        match = get_close_matches(fitosanitario, names, n=1, cutoff=0.75)
+        best = match[0] if match else None
+        # best_item = name_to_item[best] if best else None
+        if best:
+            state.infection_validated = True
+            msg = "Fitosanitario comprobado correctamente en oSIGris: "+best
+        else:
+            state.record_generated = False
+            msg = f"No encuentro ningún fitosanitario parecido al indicado en la lista oficial de oSIGris. Revisa el nombre."
+        state.check_messages.append(msg)
+    else:
+        # ---------- CASO 2: NINGÚN FITOSANITARIO ----------
+        # Reiniciar el valor de la variable, puesto que luego tendrá que generarse de nuevo el objeto válido (el registro creado anteriormente no sirve)
+        state.record_generated = False
+        msg = f"No encuentro ninguna fitosanitario parecido al indicado en la lista oficial de oSIGris. Revisa el nombre."
         state.check_messages.append(msg) 

@@ -18,6 +18,9 @@ class ChatState(BaseModel):
 
     campaign: CampaignBase = Field(default_factory=CampaignBase)
     crop: CropBase = Field(default_factory=CropBase)
+    infection_validated: bool = Field(description="Indica si la infeccion ya está validada.",default=False)
+    measure_validated: bool = Field(description="Indica si la medida ya está validada.",default=False)
+    phytosanitary_validated: bool = Field(description="Indica si el fitosanitario ya está validado.",default=False)
     
     check_errors: List[str] = Field(default_factory=list)
     check_status: Optional[str | None] = None

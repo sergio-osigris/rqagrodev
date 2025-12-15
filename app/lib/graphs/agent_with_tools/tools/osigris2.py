@@ -1,6 +1,6 @@
 from app.lib.graphs.agent_with_tools.state import ChatState
 import logging
-from .osigris import validar_explotacion, validar_cultivo
+from .osigris import validar_explotacion, validar_cultivo, validar_infeccion, validar_measure, validar_fitosanitario
 from app.models.record2 import CampaignBase, CropBase, RecordBase
 from datetime import date
 
@@ -35,8 +35,41 @@ def check_record_node(state: ChatState) -> ChatState:
             # En un fallo interno, ya no seguimos con más checks
             return state
         
-    # ---------- 3) GUARDAR CULTIVO ----------
-    if state.campaign.validated and state.crop.validated:
+    # ---------- 3) VALIDAR INFECCIÓN ----------
+    if not state.infection_validated:
+        try:
+            validar_infeccion(state)
+        except Exception as e:
+            logging.exception(f"Error ejecutando validar_infeccion: {e}")
+            state.check_errors.append("Error interno en validar_infeccion")
+            state.check_status = "failed"
+            # En un fallo interno, ya no seguimos con más checks
+            return state
+
+    # ---------- 4) VALIDAR MEASURE ----------
+    if not state.measure_validated:
+        try:
+            validar_measure(state)
+        except Exception as e:
+            logging.exception(f"Error ejecutando validar_measure: {e}")
+            state.check_errors.append("Error interno en validar_measure")
+            state.check_status = "failed"
+            # En un fallo interno, ya no seguimos con más checks
+            return state
+
+    # ---------- 5) VALIDAR FITOSANITARIO ----------
+    if not state.phytosanitary_validated:
+        try:
+            validar_fitosanitario(state)
+        except Exception as e:
+            logging.exception(f"Error ejecutando validar_fitosanitario: {e}")
+            state.check_errors.append("Error interno en validar_fitosanitario")
+            state.check_status = "failed"
+            # En un fallo interno, ya no seguimos con más checks
+            return state
+          
+    # ---------- 6) GUARDAR CULTIVO ----------
+    if state.campaign.validated and state.crop.validated and state.infection_validated and state.measure_validated and state.phytosanitary_validated:
         # Aqui guardo el cultivo
         state.record_to_save=True
         # Aqui vacio las variables
@@ -44,6 +77,9 @@ def check_record_node(state: ChatState) -> ChatState:
         state.campaign = CampaignBase(validated= False,id= "",options= [],need_choice= False,need_fix= False)
         state.crop = CropBase(validated= False,sigpacs_id= [],selected_label="",options= {},need_choice= False,need_fix= False)
         state.record_generated = False
+        state.phytosanitary_validated = False
+        state.measure_validated = False
+        state.infection_validated = False
         state.check_messages.append("PROCESO DE GUARDADO CONTRA OSIGRIS COMPLETADO CORRECTAMENTE")
     if state.check_errors:
         state.check_status = "failed"
