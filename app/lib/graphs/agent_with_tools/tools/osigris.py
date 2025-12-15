@@ -213,9 +213,10 @@ def validar_infeccion(state: ChatState) -> None:
         names = list(name_to_item.keys())
         match = get_close_matches(plaga, names, n=1, cutoff=0.75)
         best = match[0] if match else None
-        # best_item = name_to_item[best] if best else None
+        best_item = name_to_item[best] if best else None
         if best:
             state.infection_validated = True
+            state.phytosanitary_parcel.info.infection = best_item
             msg = "Infección comprobada correctamente en oSIGris: "+best
         else:
             state.record_generated = False
@@ -244,6 +245,7 @@ def validar_measure(state: ChatState) -> None:
     if valido=="si":
         state.measure_validated = True
         state.phytosanitary_parcel.info.md = datos[0]
+        state.phytosanitary_parcel.info.d = state.record.Dosis
         msg = "Medida comprobada correctamente en oSIGris"
         state.check_messages.append(msg)
     else:
@@ -271,9 +273,10 @@ def validar_fitosanitario(state: ChatState) -> None:
         names = list(name_to_item.keys())
         match = get_close_matches(fitosanitario, names, n=1, cutoff=0.75)
         best = match[0] if match else None
-        # best_item = name_to_item[best] if best else None
+        best_item = name_to_item[best] if best else None
         if best:
             state.phytosanitary_validated = True
+            state.phytosanitary_parcel.info.subtype=best_item
             msg = "Fitosanitario comprobado correctamente en oSIGris: "+best
         else:
             state.record_generated = False
