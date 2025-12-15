@@ -9,7 +9,7 @@ from typing import Dict
 from app.prompts import AGENT_WITH_TOOLS_NODE
 from app.utils.pydantic_formatters import generar_listado_campos
 from app.models.record import RecordRequest
-from app.models.record2 import RecordBase, CampaignBase, CropBase
+from app.models.record2 import RecordBase, CampaignBase, CropBase, InfoPhytosanitaryParcelOsigris, InfoPhytosanitaryOsigris
 import datetime
 from datetime import date
 from app.lib.graphs.agent_with_tools.tools.osigris2 import check_record_node
@@ -105,27 +105,30 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
 
     # El texto del botón es el label, ej: "Tomate-Cherry"
     if text in options:
-        sigpacs_ids = options[text] or []
+        chosen = options[text] or []
 
         crop["selected_label"] = text
-        crop["sigpacs_ids"] = [str(s) for s in sigpacs_ids]
+        crop["sigpacs_ids"] = [str(s) for s in chosen.get("sigpacs_id")]
+        crop["surface"]=chosen.get("surface")
         crop["validated"] = True
         crop["need_choice"] = False
         crop["need_fix"] = False
+        crop["options"] = {}
 
         state["crop"] = crop
 
         # Mensaje de confirmación para el usuario
-        if crop["sigpacs_ids"]:
+        if crop["sigpacs_ids"] and crop["surface"]:
             ids_str = ", ".join(crop["sigpacs_ids"])
             reply = (
                 f"He seleccionado el cultivo/variedad '{text}'. "
                 f"IDs SIGPAC asociados: {ids_str}."
+                f"superficie asociada: {crop["surface"]}."
             )
         else:
             reply = (
                 f"He seleccionado el cultivo/variedad '{text}', "
-                "pero no he encontrado SIGPACs asociados."
+                "pero no he encontrado SIGPACs asociados y/o superficie."
             )
 
         return state, reply
@@ -500,6 +503,20 @@ class WhatsAppMessageHandler:
                 options= {},
                 need_choice= False,
                 need_fix= False,
+            ).model_dump(),
+            "phytosanitary_parcel": InfoPhytosanitaryParcelOsigris(
+                info=InfoPhytosanitaryOsigris(
+                    id=-1,
+                    subtype={},
+                    inidate=datetime.datetime.now(),
+                    enddate=datetime.datetime.now(),
+                    d=0.0,
+                    md={},
+                    infection={},
+                    metadata=[],
+                ),
+                surface=0.0,
+                idcp=[],
             ).model_dump(),
         }
 

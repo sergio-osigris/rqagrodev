@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional,Literal, List
+from typing import Optional,Literal, List, Dict, Any
 from datetime import datetime, date
 
 class RecordBase(BaseModel):
@@ -54,18 +54,20 @@ class CropBase(BaseModel):
     # Texto elegido (por ejemplo "Tomate - Cherry")
     selected_label: Optional[str] = None
     # Mapa: label → lista de IDs
-    options: dict[str, list[str]] = {}
+    options: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
+    # superficie finalmente elegida para ese cultivo/variedad
+    surface: list[str] = []
     need_choice: bool = False
     need_fix: bool = False
 
-class MetadataOsigris():
+class MetadataOsigris(BaseModel):
 
     type: str = Field(default="Create")
     date: datetime = Field(default_factory=datetime.utcnow, title="Fecha de Creación", description="Marca de tiempo exacta (fecha y hora UTC) de cuándo se creó el registro en el sistema. Formato: AAAA-MM-DDTHH:MM:SSZ. Ejemplo: '2024-07-15T10:30:00Z'.")
     idorigin: int = Field(default=6)
     user: dict # resultado de hacer peticion GET al servicio osigrisapi/oauth/user/show con token. Revisar si nos sirve este objeto (devuelve User en vez de UserMetadata). Si no, crear objeto básico con type+id (obtenidos de api)
 
-class InfoPhytosanitaryOsigris():
+class InfoPhytosanitaryOsigris(BaseModel):
 
     type: str = Field(default="InfoPhytosanitary")
     id: int = Field(default=-1)
@@ -77,7 +79,7 @@ class InfoPhytosanitaryOsigris():
     infection: dict # resultado de cuando busque el campo plaga del objeto RecordBase en osigris. Sería un diccionario? array de campos, json, .. Si no, crear objeto básico con type+id (obtenidos de api)
     metadata: list[MetadataOsigris]
 
-class InfoPhytosanitaryParcelOsigris():
+class InfoPhytosanitaryParcelOsigris(BaseModel):
     """
     Clasifica y almacena los detalles de un registro de aplicación o labor agrícola.
     Esta clase está diseñada para ser interpretada por un LLM para la extracción de información

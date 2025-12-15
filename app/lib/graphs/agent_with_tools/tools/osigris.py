@@ -144,6 +144,9 @@ def validar_cultivo(state: ChatState) -> None:
             # ---------- CASO 1: UN ÚNICO CULTIVO: Obtenemos correctamente sus sigpacs ---------- 
             state.crop.validated = True
             state.crop.sigpacs_ids=[str(item["id"]) for item in datos[0]["sigpac"]]
+            state.crop.surface=datos[0]["dimension"]
+            state.phytosanitary_parcel.idcp = [str(item["id"]) for item in datos[0]["sigpac"]]
+            state.phytosanitary_parcel.surface = datos[0]["dimension"]
             msg = (
                 "Cultivo comprobado correctamente en la campaña.\n"
                 f"IDs de SIGPAC obtenidos: {', '.join(state.crop.sigpacs_ids) if state.crop.sigpacs_ids else 'ninguno'}"
@@ -162,8 +165,11 @@ def validar_cultivo(state: ChatState) -> None:
 
                 # lista de IDs sigpac asociados a ese cultivo/variedad
                 sigpacs_ids = [str(item["id"]) for item in d.get("sigpac", [])]
-
-                opciones[label] = sigpacs_ids
+                surface = d["dimension"]
+                opciones[label] = {
+                    "sigpacs_ids": sigpacs_ids,
+                    "surface": surface,
+                }
                 labels.append(label)
 
             state.crop.validated = False

@@ -3,7 +3,7 @@ from typing import Annotated, Literal, Optional
 from langchain_core.messages import BaseMessage
 import operator
 from typing import List,Dict, Any
-from app.models.record2 import RecordBase, CampaignBase, CropBase
+from app.models.record2 import RecordBase, CampaignBase, CropBase, InfoPhytosanitaryParcelOsigris
 
 class ChatState(BaseModel):
     # We store a pure Python list of dicts:
@@ -21,7 +21,8 @@ class ChatState(BaseModel):
     infection_validated: bool = Field(description="Indica si la infeccion ya está validada.",default=False)
     measure_validated: bool = Field(description="Indica si la medida ya está validada.",default=False)
     phytosanitary_validated: bool = Field(description="Indica si el fitosanitario ya está validado.",default=False)
-    
+    phytosanitary_parcel: InfoPhytosanitaryParcelOsigris = Field(default_factory=InfoPhytosanitaryParcelOsigris)
+
     check_errors: List[str] = Field(default_factory=list)
     check_status: Optional[str | None] = None
     check_messages: list[str] = Field(default_factory=list)
