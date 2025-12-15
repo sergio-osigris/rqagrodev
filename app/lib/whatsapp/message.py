@@ -87,11 +87,16 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
     Si no aplica, devuelve (state, None).
     """
     crop = state.get("crop") or {}
-
+    phytosanitary_parcel = state.get("phytosanitary_parcel") or {}
     # 🔒 Por si en algún estado viejo crop viene como CropBase:
     if isinstance(crop, CropBase):
         crop = crop.model_dump()
         state["crop"] = crop
+    
+    # 🔒 Por si en algún estado viejo crop viene como InfoPhytosanitaryParcelOsigris:
+    if isinstance(phytosanitary_parcel, InfoPhytosanitaryParcelOsigris):
+        phytosanitary_parcel = phytosanitary_parcel.model_dump()
+        state["phytosanitary_parcel"] = phytosanitary_parcel
 
     # Si no estamos en modo "elegir cultivo", salimos
     if not crop.get("need_choice"):
@@ -122,6 +127,8 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
                 f"IDs SIGPAC asociados: {ids_str}."
                 f"superficie asociada: {crop["surface"]}."
             )
+            state["phytosanitary_parcel"]["idcp"] = crop["sigpacs_ids"]
+            state["phytosanitary_parcel"]["surface"] = crop["surface"]
             crop["validated"] = True
             crop["need_choice"] = False
             crop["need_fix"] = False
