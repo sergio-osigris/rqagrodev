@@ -106,10 +106,10 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
     # El texto del botón es el label, ej: "Tomate-Cherry"
     if text in options:
         chosen = options[text] or []
-
+        logging.info(f"Assistant response: {chosen}")
         crop["selected_label"] = text
-        crop["sigpacs_ids"] = [str(s) for s in chosen.get("sigpacs_id")]
-        crop["surface"]=chosen.get("surface")
+        # crop["sigpacs_ids"] = [str(s) for s in chosen.get("sigpacs_id")]
+        # crop["surface"]=chosen.get("surface")
         crop["validated"] = True
         crop["need_choice"] = False
         crop["need_fix"] = False
