@@ -266,7 +266,7 @@ def validar_fitosanitario(state: ChatState) -> None:
         best = match[0] if match else None
         # best_item = name_to_item[best] if best else None
         if best:
-            state.infection_validated = True
+            state.phytosanitary_validated = True
             msg = "Fitosanitario comprobado correctamente en oSIGris: "+best
         else:
             state.record_generated = False
