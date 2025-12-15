@@ -146,7 +146,10 @@ def validar_cultivo(state: ChatState) -> None:
             state.crop.sigpacs_ids=[str(item["id"]) for item in datos[0]["sigpac"]]
             state.crop.surface=datos[0]["dimension"]
             state.phytosanitary_parcel.idcp = [str(item["id"]) for item in datos[0]["sigpac"]]
-            state.phytosanitary_parcel.surface = datos[0]["dimension"]
+            if state.record.Superficie:
+                state.phytosanitary_parcel.surface = state.record.Superficie
+            else:
+                state.phytosanitary_parcel.surface = datos[0]["dimension"]
             msg = (
                 "Cultivo comprobado correctamente en la campaña.\n"
                 f"IDs de SIGPAC obtenidos: {', '.join(state.crop.sigpacs_ids) if state.crop.sigpacs_ids else 'ninguno'}"
@@ -155,7 +158,7 @@ def validar_cultivo(state: ChatState) -> None:
         else:
             # ---------- CASO 2: VARIOS CULTIVOS EN LA CAMPAÑA ----------
             # Mapa label → lista de sigpacs_ids
-            opciones: dict[str, list[str]] = {}
+            opciones: {}
             labels: list[str] = []
 
             for d in datos:
