@@ -86,6 +86,7 @@ def check_record_node(state: ChatState) -> ChatState:
             status = guardar_fitosanitario(state)
             if status:
                 state.record_to_save=True
+                state.check_messages.append("FITO GUARDADO CORRECTAMENTE EN OSIGRIS")
                 # Aqui vacio las variables
                 state.record = RecordBase(Fecha=date.today(),Tratamiento_fitosanitario="",Campaña="",Año_Campaña="",Plaga="",Dosis=0,Medida_dosis="",Cultivo="",Variedad_Cultivo="",Superficie=0)
                 state.campaign = CampaignBase(validated= False,id= "",options= [],need_choice= False,need_fix= False)
@@ -95,6 +96,8 @@ def check_record_node(state: ChatState) -> ChatState:
                 state.measure_validated = False
                 state.infection_validated = False
                 state.metadatos_validated = False
+            else:
+                state.check_messages.append("HUBO UN PROBLEMA AL INTENTAR GUARDAR EL FITO EN OSIGRIS.")
         except Exception as e:
             logging.exception(f"Error ejecutando validar_metadatos: {e}")
             state.check_errors.append("Error interno en validar_metadatos")
