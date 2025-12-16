@@ -151,7 +151,7 @@ def json_default(o):
     if isinstance(o, BaseModel):
         return o.model_dump(mode="json", by_alias=True)
     if isinstance(o, (dt.datetime, dt.date)):
-        return o.isoformat()
+        return o.strftime("%d-%m-%Y %H:%M:%S")
     raise TypeError(f"{type(o).__name__} not JSON serializable")
 
 class WhatsAppMessageHandler:
