@@ -10,8 +10,8 @@ from app.prompts import AGENT_WITH_TOOLS_NODE
 from app.utils.pydantic_formatters import generar_listado_campos
 from app.models.record import RecordRequest
 from app.models.record2 import RecordBase, CampaignBase, CropBase, InfoPhytosanitaryParcelOsigris, InfoPhytosanitaryOsigris
-import datetime
-from datetime import date
+from pydantic import BaseModel
+import datetime as dt
 from app.lib.graphs.agent_with_tools.tools.osigris2 import check_record_node
 
 # Define tokens and IDs from environment variables
@@ -144,14 +144,13 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
     # Si el texto no coincide con ninguna opción, no hacemos nada especial
     return state, None
 
-from pydantic import BaseModel
-import datetime as dt
-
 def json_default(o):
     if isinstance(o, BaseModel):
-        return o.model_dump(mode="json", by_alias=True)
-    if isinstance(o, (dt.datetime, dt.date)):
+        return o.model_dump(by_alias=True)  # (python mode)
+    if isinstance(o, dt.datetime):
         return o.strftime("%d-%m-%Y %H:%M:%S")
+    if isinstance(o, dt.date):
+        return o.strftime("%d-%m-%Y")
     raise TypeError(f"{type(o).__name__} not JSON serializable")
 
 class WhatsAppMessageHandler:
@@ -486,7 +485,7 @@ class WhatsAppMessageHandler:
                 user_id=userInfo.get("user_id", "Desconocido"),
                 name=userInfo.get("name", "Desconocido"),
                 listado_campos=generar_listado_campos(RecordBase),
-                current_date=datetime.datetime.now().strftime("%Y-%m-%d"),
+                current_date=dt.datetime.now().strftime("%Y-%m-%d"),
             ),
         }
 
@@ -495,7 +494,7 @@ class WhatsAppMessageHandler:
             "user_id": user_id,
             "name": userInfo.get("name", "Desconocido"),
             "record": RecordBase(
-                Fecha=date.today(),
+                Fecha=dt.date.today(),
                 Tratamiento_fitosanitario="",
                 Campaña="",
                 Año_Campaña="",
@@ -526,8 +525,8 @@ class WhatsAppMessageHandler:
                 info=InfoPhytosanitaryOsigris(
                     id=-1,
                     subtype={},
-                    inidate=datetime.datetime.now(),
-                    enddate=datetime.datetime.now(),
+                    inidate=dt.datetime.now(),
+                    enddate=dt.datetime.now(),
                     d=0.0,
                     md={},
                     infection={},
