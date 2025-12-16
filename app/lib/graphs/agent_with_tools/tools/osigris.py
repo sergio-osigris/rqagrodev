@@ -3,6 +3,7 @@ import requests
 from app.lib.graphs.agent_with_tools.state import ChatState
 from difflib import get_close_matches
 from typing import Dict, Any
+from app.models.record2 import MetadataOsigris
 
 API_URL = "https://qnur3yjwqg.execute-api.eu-west-3.amazonaws.com"  
 
@@ -311,7 +312,9 @@ def validar_metadatos(state: ChatState) -> None:
             "type": "UserMetadata",
             "id": datos["id"],
         }
-        state.phytosanitary_parcel.info.metadata[0].user = d
+        state.phytosanitary_parcel.info.metadata.append(
+            MetadataOsigris(user=d)
+        )
         state.metadatos_validated = True
         msg = "Usuario comprobado correctamente en oSIGris"
         state.check_messages.append(msg)
