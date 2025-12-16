@@ -403,6 +403,7 @@ def guardar_fitosanitario(state: ChatState) -> bool:
 
     phytosanitary_parcel_to_save = json.dumps(response["phytosanitary_parcel"], ensure_ascii=False, indent=2, default=json_default)
     payload = {"data": [phytosanitary_parcel_to_save]}
+    logging.info(payload)
     valido, data, error = hacer_peticion_post(url, payload)
     if error:
         msg = "No se pudo guardar correctamente en oSIGris"
