@@ -65,8 +65,14 @@ def hacer_peticion_post(url, payload) -> str:
     }
     try:
         resp = requests.post(url, headers=headers, json=payload, timeout=5)
-        resp.raise_for_status()
         json_resp = resp.json()
+        status = resp.status_code
+        ctype = resp.headers.get("Content-Type")
+        body = resp.text or ""
+
+        logging.info(f"POST {url} -> status={status} content-type={ctype}")
+        logging.info(f"Body[:300]: {body[:300]!r}")
+
 
         errors = json_resp.get("error") or []
         data = json_resp.get("data") or []
