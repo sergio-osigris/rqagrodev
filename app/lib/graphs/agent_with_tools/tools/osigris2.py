@@ -1,6 +1,6 @@
 from app.lib.graphs.agent_with_tools.state import ChatState
 import logging
-from .osigris import validar_explotacion, validar_cultivo, validar_infeccion, validar_measure, validar_fitosanitario, validar_metadatos
+from .osigris import validar_explotacion, validar_cultivo, validar_infeccion, validar_measure, validar_fitosanitario, validar_metadatos, guardar_fitosanitario
 from app.models.record2 import CampaignBase, CropBase, RecordBase
 from datetime import date
 
@@ -82,18 +82,26 @@ def check_record_node(state: ChatState) -> ChatState:
     # ---------- 7) GUARDAR CULTIVO ----------
     if state.campaign.validated and state.crop.validated and state.infection_validated and state.measure_validated and state.phytosanitary_validated and state.metadatos_validated:
         # Aqui guardo el cultivo
-        state.record_to_save=True
-        # Aqui vacio las variables
-        state.record = RecordBase(Fecha=date.today(),Tratamiento_fitosanitario="",Campaña="",Año_Campaña="",Plaga="",Dosis=0,Medida_dosis="",Cultivo="",Variedad_Cultivo="",Superficie=0)
-        state.campaign = CampaignBase(validated= False,id= "",options= [],need_choice= False,need_fix= False)
-        state.crop = CropBase(validated= False,sigpacs_id= [],selected_label="",options= {},need_choice= False,need_fix= False)
-        state.record_generated = False
-        state.phytosanitary_validated = False
-        state.measure_validated = False
-        state.infection_validated = False
-        state.metadatos_validated = False
-        state.check_messages.append("PROCESO DE GUARDADO CONTRA OSIGRIS COMPLETADO CORRECTAMENTE")
-
+        try:
+            status = guardar_fitosanitario(state)
+            if status:
+                state.record_to_save=True
+                # Aqui vacio las variables
+                state.record = RecordBase(Fecha=date.today(),Tratamiento_fitosanitario="",Campaña="",Año_Campaña="",Plaga="",Dosis=0,Medida_dosis="",Cultivo="",Variedad_Cultivo="",Superficie=0)
+                state.campaign = CampaignBase(validated= False,id= "",options= [],need_choice= False,need_fix= False)
+                state.crop = CropBase(validated= False,sigpacs_id= [],selected_label="",options= {},need_choice= False,need_fix= False)
+                state.record_generated = False
+                state.phytosanitary_validated = False
+                state.measure_validated = False
+                state.infection_validated = False
+                state.metadatos_validated = False
+        except Exception as e:
+            logging.exception(f"Error ejecutando validar_metadatos: {e}")
+            state.check_errors.append("Error interno en validar_metadatos")
+            state.check_status = "failed"
+            # En un fallo interno, ya no seguimos con más checks
+            return state
+        
     if state.check_errors:
         state.check_status = "failed"
     else:

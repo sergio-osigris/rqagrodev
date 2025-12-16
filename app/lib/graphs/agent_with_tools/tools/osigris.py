@@ -53,6 +53,39 @@ def hacer_peticion_get(url) -> str:
     except requests.RequestException as e:
         logging.info(f"Error al conectar con el endpoint: {e}")
         return "no", None
+    
+def hacer_peticion_post(url) -> str:
+    access_token = obtener_access_token()
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Accept": "application/json"
+    }
+    try:
+        resp = requests.post(url, headers=headers, timeout=5)
+        resp.raise_for_status()
+        json_resp = resp.json()
+
+        errors = json_resp.get("error") or []
+        data = json_resp.get("data") or []
+
+        # 1) Si hay errores, manda error
+        if isinstance(errors, list) and len(errors) > 0:
+            logging.info(f"⚠️ Error devuelto por la API: {errors}")
+            return False, None, errors
+
+        # 2) Si hay data con result ok, válido
+        if isinstance(data, list) and any(item.get("result") == "ok" for item in data if isinstance(item, dict)):
+            return True, data, None
+
+        # 3) Caso raro: sin errores pero tampoco ok
+        return False, data or None, None
+
+    except requests.RequestException as e:
+        logging.info(f"Error al conectar con el endpoint: {e}")
+        return False, None, [{"message": str(e)}]
+    except ValueError as e:  # JSON inválido
+        logging.info(f"Respuesta no es JSON válido: {e}")
+        return False, None, [{"message": "Respuesta no es JSON válido"}]
  
 def validar_explotacion(state: ChatState) -> None:
     """
@@ -324,3 +357,29 @@ def validar_metadatos(state: ChatState) -> None:
         state.record_generated = False
         msg = f"En estes momentos no se encuentra registrado en la lista oficial de oSIGris. Revisa el nombre."
         state.check_messages.append(msg) 
+
+def guardar_fitosanitario(state: ChatState) -> bool:
+    """Usa esta función para guardar el registro del fitosanitario en oSIGris.
+    Rellena campos en el state y añade mensajes a check_messages y errores a check_errors.
+    """
+    # token=state.osigris_token
+    logging.info(f"--Start GuardarFito tool")
+    id_campaña=state.campaign.id
+    url = f"{API_URL}/osigrisapi/season/{id_campaña}/phytosanitaryparcel/list/"
+
+    # Inicializamos algunos flags
+    # state.metadatos_validated = False
+    
+    valido, data, error = hacer_peticion_post(url)
+    if error:
+        msg = "No se pudo guardar correctamente en oSIGris"
+        state.check_messages.append(msg)
+        return False
+    elif valido:
+        msg = "Tratamiento guardado correctamente en oSIGris"
+        state.check_messages.append(msg)
+        return True
+    else: 
+        msg = "No devuelve OK la API, pero tampoco dió error"
+        state.check_messages.append(msg)
+        return False
