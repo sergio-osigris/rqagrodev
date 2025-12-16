@@ -88,6 +88,7 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
     """
     crop = state.get("crop") or {}
     phytosanitary_parcel = state.get("phytosanitary_parcel") or {}
+    record = state.get("record") or {}
     # 🔒 Por si en algún estado viejo crop viene como CropBase:
     if isinstance(crop, CropBase):
         crop = crop.model_dump()
@@ -97,6 +98,11 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
     if isinstance(phytosanitary_parcel, InfoPhytosanitaryParcelOsigris):
         phytosanitary_parcel = phytosanitary_parcel.model_dump()
         state["phytosanitary_parcel"] = phytosanitary_parcel
+
+    #  🔒 Por si en algún estado viejo crop viene como RecordBase:
+    if isinstance(record, RecordBase):
+        record = record.model_dump()
+        state["record"] = record
 
     # Si no estamos en modo "elegir cultivo", salimos
     if not crop.get("need_choice"):
