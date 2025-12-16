@@ -128,7 +128,10 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
                 f"superficie asociada: {crop["surface"]}."
             )
             state["phytosanitary_parcel"]["idcp"] = crop["sigpacs_ids"]
-            state["phytosanitary_parcel"]["surface"] = crop["surface"]
+            if state["record"]["Superficie"]:
+                state["phytosanitary_parcel"]["surface"] = state["record"]["Superficie"]
+            else:
+                state["phytosanitary_parcel"]["surface"] = crop["surface"]
             crop["validated"] = True
             crop["need_choice"] = False
             crop["need_fix"] = False
