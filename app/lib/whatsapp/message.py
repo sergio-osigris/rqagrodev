@@ -244,7 +244,7 @@ class WhatsAppMessageHandler:
             self.clear_state(phone_number)
 
         logging.info(f"PRUEBA PRA VER EL STATE")
-        logging.info(response["phytosanitary_parcel"])
+        logging.info(json.dumps(response["phytosanitary_parcel"], default=str))
         return output_text
 
 
