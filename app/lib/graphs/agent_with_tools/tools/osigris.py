@@ -401,9 +401,11 @@ def guardar_fitosanitario(state: ChatState) -> bool:
         # Por si LangGraph ya te devuelve dict
         response = dict(state)
 
-    phytosanitary_parcel_to_save = json.dumps(response["phytosanitary_parcel"], ensure_ascii=False, indent=2, default=json_default)
+    obj = response["phytosanitary_parcel"]
+    phytosanitary_parcel_to_save = json.loads(json.dumps(obj, ensure_ascii=False, default=json_default))
     payload = {"data": [phytosanitary_parcel_to_save]}
-    logging.info(payload)
+    logging.info(json.dumps(payload, ensure_ascii=False, indent=2))
+
     valido, data, error = hacer_peticion_post(url, payload)
     if error:
         msg = "No se pudo guardar correctamente en oSIGris"
