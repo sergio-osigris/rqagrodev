@@ -50,7 +50,7 @@ class CropBase(BaseModel):
     # Campos para validar el cultivo
     validated: Optional[bool] = None
     # IDs finalmente elegidos para ese cultivo/variedad
-    sigpacs_ids: list[str] = []
+    sigpacs_ids: list[int] = []
     # Texto elegido (por ejemplo "Tomate - Cherry")
     selected_label: Optional[str] = None
     # Mapa: label → lista de IDs
