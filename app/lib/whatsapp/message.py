@@ -144,6 +144,10 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
     # Si el texto no coincide con ninguna opción, no hacemos nada especial
     return state, None
 
+def prueba_fecha(o):
+    if isinstance(o, datetime):
+        return o.strftime("%d-%m-%Y %H:%M:%S")
+    raise TypeError
 
 class WhatsAppMessageHandler:
     def __init__(
@@ -244,7 +248,7 @@ class WhatsAppMessageHandler:
             self.clear_state(phone_number)
 
         logging.info(f"PRUEBA PRA VER EL STATE")
-        logging.info(json.dumps(response["phytosanitary_parcel"], default=str))
+        logging.info(json.dumps(response["phytosanitary_parcel"], default=prueba_fecha))
         return output_text
 
 
