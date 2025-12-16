@@ -114,14 +114,14 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
         logging.info(f"Assistant response: {chosen}")
         crop["selected_label"] = text
         sigpacs = chosen.get("sigpacs_ids", [])
-        crop["sigpacs_ids"] = [str(s) for s in sigpacs]
+        crop["sigpacs_ids"] = [s for s in sigpacs]
         crop["surface"]=chosen.get("surface", 0.0)
 
         state["crop"] = crop
 
         # Mensaje de confirmación para el usuario
         if crop["sigpacs_ids"] and crop["surface"]:
-            ids_str = ", ".join(crop["sigpacs_ids"])
+            ids_str = ", ".join(str(crop["sigpacs_ids"]))
             reply = (
                 f"He seleccionado el cultivo/variedad '{text}'. "
                 f"IDs SIGPAC asociados: {ids_str}."

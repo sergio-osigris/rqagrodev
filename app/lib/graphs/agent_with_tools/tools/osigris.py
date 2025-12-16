@@ -145,16 +145,16 @@ def validar_cultivo(state: ChatState) -> None:
         if len(datos) == 1:
             # ---------- CASO 1: UN ÚNICO CULTIVO: Obtenemos correctamente sus sigpacs ---------- 
             state.crop.validated = True
-            state.crop.sigpacs_ids=[str(item["id"]) for item in datos[0]["sigpac"]]
+            state.crop.sigpacs_ids=[item["id"] for item in datos[0]["sigpac"]]
             state.crop.surface=datos[0]["dimension"]
-            state.phytosanitary_parcel.idcp = [str(item["id"]) for item in datos[0]["sigpac"]]
+            state.phytosanitary_parcel.idcp = [item["id"] for item in datos[0]["sigpac"]]
             if state.record.Superficie:
                 state.phytosanitary_parcel.surface = state.record.Superficie
             else:
                 state.phytosanitary_parcel.surface = datos[0]["dimension"]
             msg = (
                 "Cultivo comprobado correctamente en la campaña.\n"
-                f"IDs de SIGPAC obtenidos: {', '.join(state.crop.sigpacs_ids) if state.crop.sigpacs_ids else 'ninguno'}"
+                f"IDs de SIGPAC obtenidos: {', '.join(str(state.crop.sigpacs_ids)) if str(state.crop.sigpacs_ids) else 'ninguno'}"
             )
             state.check_messages.append(msg)
         else:
@@ -169,7 +169,7 @@ def validar_cultivo(state: ChatState) -> None:
                 label = f"{nombre}-{variedad}"
 
                 # lista de IDs sigpac asociados a ese cultivo/variedad
-                sigpacs_ids = [str(item["id"]) for item in d.get("sigpac", [])]
+                sigpacs_ids = [item["id"] for item in d.get("sigpac", [])]
                 surface = d["dimension"]
                 opciones[label] = {
                     "sigpacs_ids": sigpacs_ids,
