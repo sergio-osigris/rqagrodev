@@ -4,6 +4,9 @@ from app.lib.graphs.agent_with_tools.state import ChatState
 from difflib import get_close_matches
 from typing import Dict, Any
 from app.models.record2 import MetadataOsigris
+import json
+from pydantic import BaseModel
+import datetime as dt
 
 API_URL = "https://qnur3yjwqg.execute-api.eu-west-3.amazonaws.com"  
 
@@ -54,7 +57,7 @@ def hacer_peticion_get(url) -> str:
         logging.info(f"Error al conectar con el endpoint: {e}")
         return "no", None
     
-def hacer_peticion_post(url) -> str:
+def hacer_peticion_post(url, payload) -> str:
     access_token = obtener_access_token()
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -358,6 +361,15 @@ def validar_metadatos(state: ChatState) -> None:
         msg = f"En estes momentos no se encuentra registrado en la lista oficial de oSIGris. Revisa el nombre."
         state.check_messages.append(msg) 
 
+def json_default(o):
+    if isinstance(o, BaseModel):
+        return o.model_dump(by_alias=True)  # (python mode)
+    if isinstance(o, dt.datetime):
+        return o.strftime("%d-%m-%Y %H:%M:%S")
+    if isinstance(o, dt.date):
+        return o.strftime("%d-%m-%Y")
+    raise TypeError(f"{type(o).__name__} not JSON serializable")
+
 def guardar_fitosanitario(state: ChatState) -> bool:
     """Usa esta función para guardar el registro del fitosanitario en oSIGris.
     Rellena campos en el state y añade mensajes a check_messages y errores a check_errors.
@@ -369,17 +381,27 @@ def guardar_fitosanitario(state: ChatState) -> bool:
 
     # Inicializamos algunos flags
     # state.metadatos_validated = False
-    
-    valido, data, error = hacer_peticion_post(url)
+
+    # 3.1 Normalizar: convertir a dict sí o sí
+    if isinstance(state, ChatState):
+        response = state.model_dump()
+    else:
+        # Por si LangGraph ya te devuelve dict
+        response = dict(state)
+
+    payload = json.dumps(response["phytosanitary_parcel"], ensure_ascii=False, indent=2, default=json_default)
+    logging.info("PRUEBAAAAAAAAAAAAA")
+    logging.info(payload)
+    valido, data, error = hacer_peticion_post(url, payload)
     if error:
         msg = "No se pudo guardar correctamente en oSIGris"
-        state.check_messages.append(msg)
+        response.setdefault("check_messages", []).append(msg)
         return False
     elif valido:
         msg = "Tratamiento guardado correctamente en oSIGris"
-        state.check_messages.append(msg)
+        response.setdefault("check_messages", []).append(msg)
         return True
     else: 
         msg = "No devuelve OK la API, pero tampoco dió error"
-        state.check_messages.append(msg)
+        response.setdefault("check_messages", []).append(msg)
         return False
