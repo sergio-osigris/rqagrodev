@@ -64,7 +64,7 @@ def hacer_peticion_post(url, payload) -> str:
         "Accept": "application/json"
     }
     try:
-        resp = requests.post(url, headers=headers, timeout=5)
+        resp = requests.post(url, headers=headers, json=payload, timeout=5)
         resp.raise_for_status()
         json_resp = resp.json()
 
