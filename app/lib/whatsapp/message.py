@@ -145,14 +145,14 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
     return state, None
 
 from pydantic import BaseModel
-from datetime import date, datetime
+import datetime as dt
 
 def json_default(o):
     if isinstance(o, BaseModel):
         return o.model_dump(mode="json", by_alias=True)
-    if isinstance(o, (datetime, date)):
+    if isinstance(o, (dt.datetime, dt.date)):
         return o.isoformat()
-    raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable")
+    raise TypeError(f"{type(o).__name__} not JSON serializable")
 
 class WhatsAppMessageHandler:
     def __init__(
