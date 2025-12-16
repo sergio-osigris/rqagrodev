@@ -124,7 +124,7 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
             ids_str = ", ".join(map(str, crop["sigpacs_ids"]))
             reply = (
                 f"He seleccionado el cultivo/variedad '{text}'. "
-                f"IDs SIGPAC asociados: {ids_str}."
+                # f"IDs SIGPAC asociados: {ids_str}."
                 f"superficie asociada: {crop["surface"]}."
             )
             state["phytosanitary_parcel"]["idcp"] = crop["sigpacs_ids"]
