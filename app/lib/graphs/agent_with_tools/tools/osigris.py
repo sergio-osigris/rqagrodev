@@ -309,7 +309,7 @@ def validar_metadatos(state: ChatState) -> None:
     if valido=="si":
         d = {
             "type": "UserMetadata",
-            "id": datos[0]["id"],
+            "id": datos["id"],
         }
         state.phytosanitary_parcel.info.metadata[0].user = d
         state.metadatos_validated = True
