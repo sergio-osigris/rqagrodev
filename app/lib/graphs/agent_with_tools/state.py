@@ -21,6 +21,7 @@ class ChatState(BaseModel):
     infection_validated: bool = Field(description="Indica si la infeccion ya está validada.",default=False)
     measure_validated: bool = Field(description="Indica si la medida ya está validada.",default=False)
     phytosanitary_validated: bool = Field(description="Indica si el fitosanitario ya está validado.",default=False)
+    metadatos_validated: bool = Field(description="Indica si el usuario ya está validado.",default=False)
     phytosanitary_parcel: InfoPhytosanitaryParcelOsigris = Field(default_factory=InfoPhytosanitaryParcelOsigris)
 
     check_errors: List[str] = Field(default_factory=list)

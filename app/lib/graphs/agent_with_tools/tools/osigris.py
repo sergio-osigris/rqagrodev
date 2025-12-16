@@ -292,3 +292,27 @@ def validar_fitosanitario(state: ChatState) -> None:
         state.record_generated = False
         msg = f"No encuentro ninguna fitosanitario parecido al indicado en la lista oficial de oSIGris. Revisa el nombre."
         state.check_messages.append(msg) 
+
+def validar_metadatos(state: ChatState) -> None:
+    """Usa esta función para comprobar si existe el usuario en la lista oficial de osigris,
+    usando el token del usuario.
+    Rellena campos en el state y añade mensajes a check_messages y errores a check_errors.
+    """
+    # token=state.osigris_token
+    logging.info(f"--Start ComprobarMetadatos tool with arguments: VALOR DEL TOKEN AQUI")
+    url = f"{API_URL}/oauth/user/show"
+
+    # Inicializamos algunos flags
+    state.metadatos_validated = False
+    
+    valido, datos = hacer_peticion_get(url)
+    if valido=="si":
+        # state.phytosanitary_parcel.info.metadata = datos[0]
+        msg = "Usuario comprobado correctamente en oSIGris"
+        state.check_messages.append(msg)
+    else:
+        # ---------- CASO 2: NINGÚN USUARIO ----------
+        # Reiniciar el valor de la variable, puesto que luego tendrá que generarse de nuevo el objeto válido (el registro creado anteriormente no sirve)
+        state.record_generated = False
+        msg = f"En estes momentos no se encuentra registrado en la lista oficial de oSIGris. Revisa el nombre."
+        state.check_messages.append(msg) 
