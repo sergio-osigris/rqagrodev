@@ -300,7 +300,7 @@ def validar_metadatos(state: ChatState) -> None:
     """
     # token=state.osigris_token
     logging.info(f"--Start ComprobarMetadatos tool with arguments: VALOR DEL TOKEN AQUI")
-    url = f"{API_URL}/oauth/user/show"
+    url = f"{API_URL}/osigrisapi/oauth/user/show"
 
     # Inicializamos algunos flags
     state.metadatos_validated = False
