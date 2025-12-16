@@ -154,7 +154,7 @@ def validar_cultivo(state: ChatState) -> None:
                 state.phytosanitary_parcel.surface = datos[0]["dimension"]
             msg = (
                 "Cultivo comprobado correctamente en la campaña.\n"
-                f"IDs de SIGPAC obtenidos: {', '.join(str(state.crop.sigpacs_ids)) if str(state.crop.sigpacs_ids) else 'ninguno'}"
+                f"IDs de SIGPAC obtenidos: {', '.join(map(str, state.crop.sigpacs_ids)) if state.crop.sigpacs_ids else 'ninguno'}"
             )
             state.check_messages.append(msg)
         else:

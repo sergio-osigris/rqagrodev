@@ -121,7 +121,7 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
 
         # Mensaje de confirmación para el usuario
         if crop["sigpacs_ids"] and crop["surface"]:
-            ids_str = ", ".join(str(crop["sigpacs_ids"]))
+            ids_str = ", ".join(map(str, crop["sigpacs_ids"]))
             reply = (
                 f"He seleccionado el cultivo/variedad '{text}'. "
                 f"IDs SIGPAC asociados: {ids_str}."
