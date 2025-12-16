@@ -144,6 +144,16 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
     # Si el texto no coincide con ninguna opción, no hacemos nada especial
     return state, None
 
+from pydantic import BaseModel
+from datetime import date, datetime
+
+def json_default(o):
+    if isinstance(o, BaseModel):
+        return o.model_dump(mode="json", by_alias=True)
+    if isinstance(o, (datetime, date)):
+        return o.isoformat()
+    raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable")
+
 class WhatsAppMessageHandler:
     def __init__(
         self,
@@ -218,7 +228,7 @@ class WhatsAppMessageHandler:
 
         # 3.1 Normalizar: convertir a dict sí o sí
         if isinstance(response_state, ChatState):
-            response = response_state.model_dump(mode="json")
+            response = response_state.model_dump()
         else:
             # Por si LangGraph ya te devuelve dict
             response = dict(response_state)
@@ -242,8 +252,9 @@ class WhatsAppMessageHandler:
             logging.info("Detected new record generated. Deleting chat history")
             self.clear_state(phone_number)
 
-        logging.info(f"PRUEBA PRA VER EL STATE")
-        logging.info(json.dumps(response["phytosanitary_parcel"], ensure_ascii=False, default=str))
+        logging.info("PRUEBA PRA VER EL STATE")
+        logging.info(json.dumps(response["phytosanitary_parcel"], ensure_ascii=False, indent=2, default=json_default))
+
         return output_text
 
 
