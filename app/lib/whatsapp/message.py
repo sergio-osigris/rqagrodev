@@ -145,7 +145,7 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
     return state, None
 
 def prueba_fecha(o):
-    if isinstance(o, datetime):
+    if isinstance(o, datetime.datetime):
         return o.strftime("%d-%m-%Y %H:%M:%S")
     raise TypeError
 
