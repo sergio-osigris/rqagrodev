@@ -61,40 +61,46 @@ def hacer_peticion_post(url, payload) -> str:
     access_token = obtener_access_token()
     headers = {
         "Authorization": f"Bearer {access_token}",
-        "Accept": "application/json"
+        "Accept": "application/json",
     }
+
     try:
-        resp = requests.post(url, headers=headers, json=payload, timeout=5)
-        json_resp = resp.json()
+        resp = requests.post(url, headers=headers, json=payload, timeout=10)
         status = resp.status_code
-        ctype = resp.headers.get("Content-Type")
+        ctype = (resp.headers.get("Content-Type") or "").lower()
         body = resp.text or ""
 
-        logging.info(f"POST {url} -> status={status} content-type={ctype}")
-        logging.info(f"Body[:300]: {body[:300]!r}")
+        # Si no es 2xx, enseña el body (suele traer HTML/texto de error)
+        if not (200 <= status < 300):
+            logging.error(f"HTTP {status} ctype={ctype} body[:500]={body[:500]!r}")
+            resp.raise_for_status()
 
+        # Body vacío => imposible parsear JSON
+        if body.strip() == "":
+            logging.error(f"Respuesta vacía. HTTP {status} ctype={ctype}")
+            return False, None, [{"message": "Empty body", "status": status, "content_type": ctype}]
+
+        # Intentar parsear JSON, y si falla, mostrar qué vino
+        try:
+            json_resp = resp.json()
+        except requests.exceptions.JSONDecodeError as e:
+            logging.error(f"Respuesta NO es JSON. HTTP {status} ctype={ctype} body[:500]={body[:500]!r}")
+            return False, None, [{"message": "Non-JSON response", "status": status, "content_type": ctype, "body": body[:500]}]
 
         errors = json_resp.get("error") or []
         data = json_resp.get("data") or []
 
-        # 1) Si hay errores, manda error
-        if isinstance(errors, list) and len(errors) > 0:
-            logging.info(f"⚠️ Error devuelto por la API: {errors}")
+        if errors:
             return False, None, errors
 
-        # 2) Si hay data con result ok, válido
-        if isinstance(data, list) and any(item.get("result") == "ok" for item in data if isinstance(item, dict)):
+        if any(isinstance(item, dict) and item.get("result") == "ok" for item in data):
             return True, data, None
 
-        # 3) Caso raro: sin errores pero tampoco ok
-        return False, data or None, None
+        return False, data or None, [{"message": "No result ok en data"}]
 
     except requests.RequestException as e:
-        logging.info(f"Error al conectar con el endpoint: {e}")
+        logging.exception(f"Error HTTP real: {e}")
         return False, None, [{"message": str(e)}]
-    except ValueError as e:  # JSON inválido
-        logging.info(f"Respuesta no es JSON válido: {e}")
-        return False, None, [{"message": "Respuesta no es JSON válido"}]
  
 def validar_explotacion(state: ChatState) -> None:
     """
