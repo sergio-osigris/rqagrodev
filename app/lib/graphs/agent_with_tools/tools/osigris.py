@@ -308,6 +308,7 @@ def validar_metadatos(state: ChatState) -> None:
     valido, datos = hacer_peticion_get(url)
     if valido=="si":
         # state.phytosanitary_parcel.info.metadata = datos[0]
+        state.metadatos_validated = True
         msg = "Usuario comprobado correctamente en oSIGris"
         state.check_messages.append(msg)
     else:
