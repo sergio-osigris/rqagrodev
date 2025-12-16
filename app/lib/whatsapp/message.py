@@ -144,11 +144,6 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
     # Si el texto no coincide con ninguna opción, no hacemos nada especial
     return state, None
 
-def prueba_fecha(o):
-    if isinstance(o, datetime.datetime):
-        return o.strftime("%d-%m-%Y %H:%M:%S")
-    raise TypeError
-
 class WhatsAppMessageHandler:
     def __init__(
         self,
@@ -223,7 +218,7 @@ class WhatsAppMessageHandler:
 
         # 3.1 Normalizar: convertir a dict sí o sí
         if isinstance(response_state, ChatState):
-            response = response_state.model_dump()
+            response = response_state.model_dump(mode="json")
         else:
             # Por si LangGraph ya te devuelve dict
             response = dict(response_state)
@@ -248,7 +243,7 @@ class WhatsAppMessageHandler:
             self.clear_state(phone_number)
 
         logging.info(f"PRUEBA PRA VER EL STATE")
-        logging.info(json.dumps(response["phytosanitary_parcel"], ensure_ascii=False, default=prueba_fecha))
+        logging.info(json.dumps(response["phytosanitary_parcel"], ensure_ascii=False, default=str))
         return output_text
 
 
