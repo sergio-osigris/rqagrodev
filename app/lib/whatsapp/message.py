@@ -37,16 +37,17 @@ def extract_buttons(text):
 def handle_choice(state: dict, message: str) -> tuple[dict, str | None]:
     # CASO ESPECIAL: el usuario está eligiendo campaña por botón
     state, campaign_choice_msg = handle_campaign_choice(state, message)
-    if campaign_choice_msg is None:
+    if not campaign_choice_msg:
         # CASO ESPECIAL: el usuario está eligiendo cultivo por botón
         state, crop_choice_msg = handle_crop_choice(state, message)
-        if crop_choice_msg is None:
+        if not crop_choice_msg:
             if state["record_generated"] is True:
-                return state, "Campaña y cultivo seleccionados correctamente. Vamos a comprobar el resto de datos antes de guardar.."
-            return state, None
+                logging.info("Campaña y cultivo seleccionados correctamente. Vamos a comprobar el resto de datos antes de guardar..")
+                return state, True
+            return state, False
         else:
-            return state, crop_choice_msg
-    return state, campaign_choice_msg
+            return state, True
+    return state, True
 
 def handle_campaign_choice(state: dict, message: str) -> tuple[dict, str | None]:
     campaign = state.get("campaign") or {}
@@ -57,11 +58,11 @@ def handle_campaign_choice(state: dict, message: str) -> tuple[dict, str | None]
         state["campaign"] = campaign
 
     if not campaign.get("need_choice"):
-        return state, None
+        return state, False
 
     options = campaign.get("options") or []
     if not options:
-        return state, None
+        return state, False
 
     text = message.strip()
 
@@ -73,10 +74,10 @@ def handle_campaign_choice(state: dict, message: str) -> tuple[dict, str | None]
 
         state["campaign"] = campaign
 
-        reply = f"He seleccionado la campaña con ID {text}. Ahora voy a comprobar el resto de datos."
-        return state, reply
+        logging.info(f"He seleccionado la campaña con ID {text}. Ahora voy a comprobar el resto de datos.")
+        return state, True
 
-    return state, None
+    return state, False
 
 def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
     """
@@ -106,11 +107,11 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
 
     # Si no estamos en modo "elegir cultivo", salimos
     if not crop.get("need_choice"):
-        return state, None
+        return state, False
 
     options = crop.get("options") or {}
     if not options:
-        return state, None
+        return state, False
 
     text = message.strip()
 
@@ -128,7 +129,7 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
         # Mensaje de confirmación para el usuario
         if crop["sigpacs_ids"] and crop["surface"]:
             ids_str = ", ".join(map(str, crop["sigpacs_ids"]))
-            reply = (
+            logging.info(
                 f"He seleccionado el cultivo/variedad '{text}'. "
                 f"IDs SIGPAC asociados: {ids_str}."
                 f"superficie asociada: {crop["surface"]}."
@@ -143,15 +144,15 @@ def handle_crop_choice(state: dict, message: str) -> tuple[dict, str | None]:
             crop["need_fix"] = False
             crop["options"] = {}
         else:
-            reply = (
+            logging.info(
                 f"He seleccionado el cultivo/variedad '{text}', "
                 "pero no he encontrado SIGPACs asociados y/o superficie."
             )
 
-        return state, reply
+        return state, True
 
     # Si el texto no coincide con ninguna opción, no hacemos nada especial
-    return state, None
+    return state, False
 
 def json_default(o):
     if isinstance(o, BaseModel):
@@ -205,7 +206,7 @@ class WhatsAppMessageHandler:
         state, choice_msg = handle_choice(state, message)
 
         # Tenemos una campaña o cultivo elegid@ ⇒ ejecutamos directamente las comprobaciones sin pasar por el agente y las tools como CreateRecord
-        if choice_msg is not None :
+        if choice_msg:
             # Pasar de dict -> ChatState
             state = ChatState(**state)
             logging.info(f"Prueba: {state}")
@@ -218,11 +219,7 @@ class WhatsAppMessageHandler:
             # Montar mensaje a usuario con las comprobaciones
             check_messages = response.get("check_messages") or []
             if check_messages:
-                checks_text = "\n".join(str(msg) for msg in check_messages)
-                output_text = f"{choice_msg}\n\n{checks_text}"
-            else:
-                # Si no hay mensajes de check, responde solo la confirmación
-                output_text = choice_msg
+                output_text = "\n".join(str(msg) for msg in check_messages)
             logging.info(f"Assistant response: {output_text}")
             ready_save = response.get("record_to_save") or None
             if ready_save:
@@ -259,9 +256,6 @@ class WhatsAppMessageHandler:
         if (response.get("record_to_save", False) is True):
             logging.info("Detected new record generated. Deleting chat history")
             self.clear_state(phone_number)
-
-        logging.info("PRUEBA PRA VER EL STATE")
-        logging.info(json.dumps(response["phytosanitary_parcel"], ensure_ascii=False, indent=2, default=json_default))
 
         return output_text
 

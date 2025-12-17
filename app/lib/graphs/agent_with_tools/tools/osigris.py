@@ -133,8 +133,9 @@ def validar_explotacion(state: ChatState) -> None:
             state.campaign.validated = True
             state.campaign.id = str(id_campaña)
 
-            msg = f"Campaña comprobada. ID de Campaña: {id_campaña}"
-            state.check_messages.append(msg)
+            # msg = f"Campaña comprobada. ID de Campaña: {id_campaña}"
+            # state.check_messages.append(msg)
+            logging.info(f"Campaña comprobada. ID de Campaña: {id_campaña}")
 
         elif len(datos) > 1:
             # ---------- CASO 2: VARIAS CAMPAÑAS ----------
@@ -204,7 +205,8 @@ def validar_cultivo(state: ChatState) -> None:
                 "Cultivo comprobado correctamente en la campaña.\n"
                 f"IDs de SIGPAC obtenidos: {', '.join(map(str, state.crop.sigpacs_ids)) if state.crop.sigpacs_ids else 'ninguno'}"
             )
-            state.check_messages.append(msg)
+            # state.check_messages.append(msg)
+            logging.info(msg)
         else:
             # ---------- CASO 2: VARIOS CULTIVOS EN LA CAMPAÑA ----------
             # Mapa label → lista de sigpacs_ids
@@ -270,7 +272,8 @@ def validar_infeccion(state: ChatState) -> None:
         if best:
             state.infection_validated = True
             state.phytosanitary_parcel.info.infection = best_item
-            msg = "Infección comprobada correctamente en oSIGris: "+best
+            msg1 = "Infección comprobada correctamente en oSIGris: "+best
+            logging.info(msg1)
         else:
             state.record_generated = False
             msg = f"No encuentro ninguna infección/plaga parecida a la indicada en la lista oficial de oSIGris. Revisa el nombre."
@@ -300,7 +303,8 @@ def validar_measure(state: ChatState) -> None:
         state.phytosanitary_parcel.info.md = datos[0]
         state.phytosanitary_parcel.info.d = state.record.Dosis
         msg = "Medida comprobada correctamente en oSIGris"
-        state.check_messages.append(msg)
+        logging.info(msg)
+        # state.check_messages.append(msg)
     else:
         # ---------- CASO 2: NINGUNA MEDIDA ----------
         # Reiniciar el valor de la variable, puesto que luego tendrá que generarse de nuevo el objeto válido (el registro creado anteriormente no sirve)
@@ -330,7 +334,8 @@ def validar_fitosanitario(state: ChatState) -> None:
         if best:
             state.phytosanitary_validated = True
             state.phytosanitary_parcel.info.subtype=best_item
-            msg = "Fitosanitario comprobado correctamente en oSIGris: "+best
+            msg1 = "Fitosanitario comprobado correctamente en oSIGris: "+best
+            logging.info(msg1)
         else:
             state.record_generated = False
             msg = f"No encuentro ningún fitosanitario parecido al indicado en la lista oficial de oSIGris. Revisa el nombre."
@@ -365,7 +370,8 @@ def validar_metadatos(state: ChatState) -> None:
         )
         state.metadatos_validated = True
         msg = "Usuario comprobado correctamente en oSIGris"
-        state.check_messages.append(msg)
+        logging.info(msg)
+        # state.check_messages.append(msg)
     else:
         # ---------- CASO 2: NINGÚN USUARIO ----------
         # Reiniciar el valor de la variable, puesto que luego tendrá que generarse de nuevo el objeto válido (el registro creado anteriormente no sirve)
