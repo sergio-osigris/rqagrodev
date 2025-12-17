@@ -272,12 +272,12 @@ def validar_infeccion(state: ChatState) -> None:
         if best:
             state.infection_validated = True
             state.phytosanitary_parcel.info.infection = best_item
-            msg1 = "Infección comprobada correctamente en oSIGris: "+best
-            logging.info(msg1)
+            msg = "Infección comprobada correctamente en oSIGris: "+best
+            logging.info(msg)
         else:
             state.record_generated = False
             msg = f"No encuentro ninguna infección/plaga parecida a la indicada en la lista oficial de oSIGris. Revisa el nombre."
-        state.check_messages.append(msg)
+            state.check_messages.append(msg)
     else:
         # ---------- CASO 2: NINGUNA INFECCIÓN ----------
         # Reiniciar el valor de la variable, puesto que luego tendrá que generarse de nuevo el objeto válido (el registro creado anteriormente no sirve)
@@ -334,12 +334,12 @@ def validar_fitosanitario(state: ChatState) -> None:
         if best:
             state.phytosanitary_validated = True
             state.phytosanitary_parcel.info.subtype=best_item
-            msg1 = "Fitosanitario comprobado correctamente en oSIGris: "+best
-            logging.info(msg1)
+            msg = "Fitosanitario comprobado correctamente en oSIGris: "+best
+            logging.info(msg)
         else:
             state.record_generated = False
             msg = f"No encuentro ningún fitosanitario parecido al indicado en la lista oficial de oSIGris. Revisa el nombre."
-        state.check_messages.append(msg)
+            state.check_messages.append(msg)
     else:
         # ---------- CASO 2: NINGÚN FITOSANITARIO ----------
         # Reiniciar el valor de la variable, puesto que luego tendrá que generarse de nuevo el objeto válido (el registro creado anteriormente no sirve)
